@@ -64,7 +64,7 @@ def main():
     robot.set_on_monitoring_access_control(on_monitoring_access_control)
     robot.set_on_monitoring_state(on_monitoring_state)
 
-    ret = robot.open_connection(IP_ADDRESS, port=PORT) # Connec to the Robot
+    ret = robot.open_connection(IP_ADDRESS, port=PORT) # Connect to the Robot
 
     print(f"open_connection return value: {ret}")
     if not ret:
