@@ -867,9 +867,9 @@ void bMovesj(Class& c){
           return self.movesj(pTargetPos, nPosCount, fTargetVel, fTargetAcc,
                              fTargetTime, eMoveMode);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE);
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
 
     // -------------------------------------------------------------------------
     // movesj - array vel/acc overload
@@ -897,9 +897,9 @@ void bMovesj(Class& c){
                              fTargetAcc.mutable_data(), fTargetTime,
                              eMoveMode);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE);
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
 }
 
 void bMovesx(Class& c){
@@ -930,10 +930,10 @@ void bMovesx(Class& c){
                              fTargetAcc.mutable_data(), fTargetTime,
                              eMoveMode, eMoveReference, eVelOpt);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("eVelOpt") = SPLINE_VELOCITY_OPTION_DEFAULT);
 }
 
@@ -961,10 +961,10 @@ void bMoveb(Class &c) {
                             fTargetAcc.mutable_data(), fTargetTime, eMoveMode,
                             eMoveReference, eAppType);
         },
-        py::arg("tTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("tTargetPos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("eAppType") = DR_MV_APP_NONE);
 }
 
@@ -991,9 +991,9 @@ void bMoveSpiral(Class& c){
         },
         py::arg("eTaskAxis"), py::arg("fRevolution"),
         py::arg("fMaximuRadius"), py::arg("fMaximumLength"),
-        py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveReference") = MOVE_REFERENCE_TOOL);
+        py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_reference") = MOVE_REFERENCE_TOOL);
 
     // -------------------------------------------------------------------------
     // move_spiral - target position overload
@@ -1018,11 +1018,11 @@ void bMoveSpiral(Class& c){
               fTargetVel.mutable_data(), fTargetAcc.mutable_data(),
               fTargetTime, eMoveReference, eMoveMode, eSpiralDir, eRotDir);
         },
-        py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("fTargetPos"),
-        py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveReference") = MOVE_REFERENCE_TOOL,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
+        py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("pos"),
+        py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_reference") = MOVE_REFERENCE_TOOL,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
         py::arg("eSpiralDir") = DR_SPIRAL_OUTWARD,
         py::arg("eRotDir") = DR_ROT_FORWARD);
 }
@@ -1046,13 +1046,32 @@ void bMovePeriodic(Class& c){
                                     nRepeat, eMoveReference);
         },
         py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
-        py::arg("nRepeat"), py::arg("eMoveReference") = MOVE_REFERENCE_TOOL);
+        py::arg("nRepeat"), py::arg("move_reference") = MOVE_REFERENCE_TOOL);
 }
 
 void bAmovej(Class& c) {
     // -------------------------------------------------------------------------
     // amovej
     // -------------------------------------------------------------------------
+    //
+    //bool amovej(float fTargetPos[NUM_JOINT], float fTargetVel, float fTargetAcc, float fTargetTime = 0.f, MOVE_MODE eMoveMode = MOVE_MODE_ABSOLUTE, BLENDING_SPEED_TYPE eBlendingType = BLENDING_SPEED_TYPE_DUPLICATE)
+    c.def(
+        "amovej",
+        [](DRAFramework::CDRFLEx &self, py::array_t<float> targetPos,
+           float targetVal, float targetAcc, float targetTime,
+           MOVE_MODE moveMode,
+           BLENDING_SPEED_TYPE blendingType) {
+          if (targetPos.size() != NUM_JOINT)
+            throw std::runtime_error("Pos must have exactly 6 elements");
+          return self.movej(targetPos.mutable_data(), targetVal, targetAcc,
+                            targetTime, moveMode,
+                            blendingType);
+        },
+        py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
+        py::arg("blending_type") =
+            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+        "Amovej array command");
     c.def(
         "amovej",
         [](DRAFramework::CDRFLEx &self, arr_f fTargetPos, arr_f fTargetVel,
@@ -1072,10 +1091,11 @@ void bAmovej(Class& c) {
                              fTargetAcc.mutable_data(), fTargetTime,
                              eMoveMode, eBlendingType);
         },
-        py::arg("fTargetPos"), py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eBlendingType") = BLENDING_SPEED_TYPE_DUPLICATE);
+        py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("blending_type") = BLENDING_SPEED_TYPE_DUPLICATE);
+
+
 }
 
 void bAmovel(Class& c) {
@@ -1102,10 +1122,10 @@ void bAmovel(Class& c) {
               fTargetAcc.mutable_data(), fTargetTime, eMoveMode,
               eMoveReference, eBlendingType, eAppType);
         },
-        py::arg("fTargetPos"), py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("pos"), py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("eBlendingType") = BLENDING_SPEED_TYPE_DUPLICATE,
         py::arg("eAppType") = DR_MV_APP_NONE);
 }
@@ -1140,10 +1160,10 @@ void bAmovec(Class& c) {
                              fTargetAngle2, eBlendingType, eOrientation,
                              eAppType);
         },
-        py::arg("fTargetPos"), py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("pos"), py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("fTargetAngle1") = 0.f, py::arg("fTargetAngle2") = 0.f,
         py::arg("eBlendingType") = BLENDING_SPEED_TYPE_DUPLICATE,
         py::arg("eOrientation") = DR_MV_ORI_TEACH,
@@ -1170,9 +1190,9 @@ void bAmovesj(Class& c) {
           return self.amovesj(pTargetPos, nPosCount, fTargetVel, fTargetAcc,
                               fTargetTime, eMoveMode);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE);
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
 
     // -------------------------------------------------------------------------
     // amovesj - array vel/acc overload
@@ -1200,9 +1220,9 @@ void bAmovesj(Class& c) {
               pTargetPos, nPosCount, fTargetVel.mutable_data(),
               fTargetAcc.mutable_data(), fTargetTime, eMoveMode);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE);
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
 }
 
 void bAmovesx(Class& c) {
@@ -1234,10 +1254,10 @@ void bAmovesx(Class& c) {
                               fTargetAcc.mutable_data(), fTargetTime,
                               eMoveMode, eMoveReference, eVelOpt);
         },
-        py::arg("fTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("eVelOpt") = SPLINE_VELOCITY_OPTION_DEFAULT);
 }
 
@@ -1265,10 +1285,10 @@ void bAmoveb(Class& c){
                              fTargetAcc.mutable_data(), fTargetTime,
                              eMoveMode, eMoveReference, eAppType);
         },
-        py::arg("tTargetPos"), py::arg("nPosCount"), py::arg("fTargetVel"),
-        py::arg("fTargetAcc"), py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eMoveReference") = MOVE_REFERENCE_BASE,
+        py::arg("tTargetPos"), py::arg("pos_count"), py::arg("vel"),
+        py::arg("acc"), py::arg("time") = 0.f,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
+        py::arg("move_reference") = MOVE_REFERENCE_BASE,
         py::arg("eAppType") = DR_MV_APP_NONE);
 }
 
@@ -1295,9 +1315,9 @@ void bAmoveSpiral(Class& c) {
         },
         py::arg("eTaskAxis"), py::arg("fRevolution"),
         py::arg("fMaximuRadius"), py::arg("fMaximumLength"),
-        py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveReference") = MOVE_REFERENCE_TOOL);
+        py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_reference") = MOVE_REFERENCE_TOOL);
 
     // -------------------------------------------------------------------------
     // amove_spiral - target position overload
@@ -1322,11 +1342,11 @@ void bAmoveSpiral(Class& c) {
               fTargetVel.mutable_data(), fTargetAcc.mutable_data(),
               fTargetTime, eMoveReference, eMoveMode, eSpiralDir, eRotDir);
         },
-        py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("fTargetPos"),
-        py::arg("fTargetVel"), py::arg("fTargetAcc"),
-        py::arg("fTargetTime") = 0.f,
-        py::arg("eMoveReference") = MOVE_REFERENCE_TOOL,
-        py::arg("eMoveMode") = MOVE_MODE_ABSOLUTE,
+        py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("pos"),
+        py::arg("vel"), py::arg("acc"),
+        py::arg("time") = 0.f,
+        py::arg("move_reference") = MOVE_REFERENCE_TOOL,
+        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
         py::arg("eSpiralDir") = DR_SPIRAL_OUTWARD,
         py::arg("eRotDir") = DR_ROT_FORWARD);
 }
@@ -1350,7 +1370,7 @@ void bAmovePeriodic(Class& c){
                                      nRepeat, eMoveReference);
         },
         py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
-        py::arg("nRepeat"), py::arg("eMoveReference") = MOVE_REFERENCE_TOOL);
+        py::arg("nRepeat"), py::arg("move_reference") = MOVE_REFERENCE_TOOL);
 }
 
 void bStop(Class& c) {
@@ -1512,7 +1532,7 @@ void bAlterMotion(Class& c) {
                 "fTargetPos must have exactly NUM_TASK elements");
           return self.alter_motion(fTargetPos.mutable_data());
         },
-        py::arg("fTargetPos"));
+        py::arg("pos"));
 }
 
 void bDisableAlterMotion(Class& c) {
@@ -1544,8 +1564,8 @@ void bServoj(Class& c) {
               fTargetPos.mutable_data(), fLimitVel.mutable_data(),
               fLimitAcc.mutable_data(), fTargetTime, eTargetMod);
         },
-        py::arg("fTargetPos"), py::arg("fLimitVel"), py::arg("fLimitAcc"),
-        py::arg("fTargetTime"), py::arg("eTargetMod") = DR_SERVO_OVERRIDE);
+        py::arg("pos"), py::arg("fLimitVel"), py::arg("fLimitAcc"),
+        py::arg("time"), py::arg("eTargetMod") = DR_SERVO_OVERRIDE);
 }
 
 void bServol(Class& c) {
@@ -1569,8 +1589,8 @@ void bServol(Class& c) {
                              fLimitVel.mutable_data(),
                              fLimitAcc.mutable_data(), fTargetTime);
         },
-        py::arg("fTargetPos"), py::arg("fLimitVel"), py::arg("fLimitAcc"),
-        py::arg("fTargetTime"));
+        py::arg("pos"), py::arg("fLimitVel"), py::arg("fLimitAcc"),
+        py::arg("time"));
 }
 
 void bSpeedj(Class& c){
@@ -1590,7 +1610,7 @@ void bSpeedj(Class& c){
           return self.speedj(fTargetVel.mutable_data(),
                              fTargetAcc.mutable_data(), fTargetTime);
         },
-        py::arg("fTargetVel"), py::arg("fTargetAcc"), py::arg("fTargetTime"));
+        py::arg("vel"), py::arg("acc"), py::arg("time"));
 }
 
 void bSpeedl(Class& c) {
@@ -1610,7 +1630,7 @@ void bSpeedl(Class& c) {
           return self.speedl(fTargetVel.mutable_data(),
                              fTargetAcc.mutable_data(), fTargetTime);
         },
-        py::arg("fTargetVel"), py::arg("fTargetAcc"), py::arg("fTargetTime"));
+        py::arg("vel"), py::arg("acc"), py::arg("time"));
 }
 
 // Robot settings fuctions
@@ -2259,7 +2279,7 @@ void bTaskComplianceCtrl(Class& c) {
         },
         py::arg("fTargetStiffness"),
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
-        py::arg("fTargetTime")     = 0.f);
+        py::arg("time")     = 0.f);
 }
 
 // bool release_compliance_ctrl()
@@ -2285,7 +2305,7 @@ void bSetStiffnessx(Class& c) {
         },
         py::arg("fTargetStiffness"),
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
-        py::arg("fTargetTime")     = 0.f);
+        py::arg("time")     = 0.f);
 }
 
 // LPROBOT_POSE calc_coord(unsigned short nCnt, unsigned short nInputMode,
@@ -2329,10 +2349,10 @@ void bSetUserCartCoord(Class& c) {
            COORDINATE_SYSTEM eTargetRef)
         {
             return self.set_user_cart_coord(iReqId,
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"), //Check
                 eTargetRef);
         },
-        py::arg("iReqId"), py::arg("fTargetPos"),
+        py::arg("iReqId"), py::arg("pos"),
         py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
 
     c.def("set_user_cart_coord",
@@ -2359,7 +2379,7 @@ void bSetUserCartCoord(Class& c) {
                     "fTargetPos must have shape (3, NUM_TASK) or (2, 3)");
             }
         },
-        py::arg("fTargetPos"), py::arg("fTargetOrg"),
+        py::arg("pos"), py::arg("fTargetOrg"),
         py::arg("fTargetRef") = COORDINATE_SYSTEM_BASE);
 }
 
@@ -2375,10 +2395,10 @@ void bOverwriteUserCartCoord(Class& c) {
            COORDINATE_SYSTEM eTargetRef)
         {
             return self.overwrite_user_cart_coord(bTargetUpdate, iReqId,
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"), //Check
                 eTargetRef);
         },
-        py::arg("bTargetUpdate"), py::arg("iReqId"), py::arg("fTargetPos"),
+        py::arg("bTargetUpdate"), py::arg("iReqId"), py::arg("pos"),
         py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
 }
 
@@ -2415,7 +2435,7 @@ void bSetDesiredForce(Class& c) {
         },
         py::arg("fTargetForce"), py::arg("iTargetDirection"),
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
-        py::arg("fTargetTime")     = 0.f,
+        py::arg("time")     = 0.f,
         py::arg("eForceMode")      = FORCE_MODE_ABSOLUTE);
 }
 
@@ -2425,7 +2445,7 @@ void bReleaseForce(Class& c) {
         [](DRAFramework::CDRFLEx& self, float fTargetTime) {
             return self.release_force(fTargetTime);
         },
-        py::arg("fTargetTime") = 0.f);
+        py::arg("time") = 0.f);
 }
 
 // bool check_position_condition_abs(FORCE_AXIS eForceAxis, float fTargetMin, float fTargetMax,
@@ -2455,11 +2475,11 @@ void bCheckPositionConditionRel(Class& c) {
         {
             return self.check_position_condition_rel(
                 eForceAxis, fTargetMin, fTargetMax,
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"),
                 eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("fTargetPos"),
+        py::arg("pos"),
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
 }
 
@@ -2476,11 +2496,11 @@ void bCheckPositionCondition(Class& c) {
         {
             return self.check_position_condition(
                 eForceAxis, fTargetMin, fTargetMax,
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"),
                 eMode, eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("fTargetPos"),
+        py::arg("pos"),
         py::arg("eMode")           = MOVE_MODE_ABSOLUTE,
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
 }
@@ -2532,11 +2552,11 @@ void bCheckOrientationCondition(Class& c) {
         {
             return self.check_orientation_condition(eForceAxis,
                 fTargetMin, fTargetMax,
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"),
                 eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("fTargetPos"),
+        py::arg("pos"),
         py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
 }
 
@@ -2551,10 +2571,10 @@ void bCoordTransform(Class& c) {
            COORDINATE_SYSTEM eOutCoordSystem)
         {
             return self.coord_transform(
-                checkArray1D(fTargetPos, NUM_TASK, "fTargetPos"),
+                checkArray1D(fTargetPos, NUM_TASK, "pos"),
                 eInCoordSystem, eOutCoordSystem);
         },
-        py::arg("fTargetPos"), py::arg("eInCoordSystem"), py::arg("eOutCoordSystem"));
+        py::arg("pos"), py::arg("eInCoordSystem"), py::arg("eOutCoordSystem"));
 }
 
 // bool set_palletizing_mode(unsigned char iMode)
