@@ -122,6 +122,17 @@ class BuildExtWithStubs(build_ext):
         stub_dir  = os.path.join(os.path.dirname(__file__), 'stubs')
         stub_file = f"{module_name}.pyi"
 
+        # Make the just-built extension importable whether we're doing
+        # "build_ext --inplace" (ext lands in source dir) or "pip install ."
+        # (ext lands in a temp dir like build/lib.linux-x86_64-3.x).
+        search_paths = [
+            os.path.abspath(self.build_lib),             # pip install / build
+            os.path.dirname(os.path.abspath(__file__)),  # --inplace
+        ]
+        env = os.environ.copy()
+        existing = env.get('PYTHONPATH', '')
+        env['PYTHONPATH'] = os.pathsep.join(filter(None, search_paths + [existing]))
+
         for generator, package_name in stub_generators:
             try:
                 probe = subprocess.run(
@@ -139,7 +150,7 @@ class BuildExtWithStubs(build_ext):
                     if generator == 'pybind11_stubgen'
                     else [sys.executable, '-m', generator, '-m', module_name, '-o', stub_dir]
                 )
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
                 if result.returncode == 0:
                     src = os.path.join(stub_dir, stub_file)
