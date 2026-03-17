@@ -102,15 +102,15 @@ void bind_drfl_enums(py::module_ &m) {
 
   // Defines coordinate system used by the robot.
   py::enum_<COORDINATE_SYSTEM>(m, "COORDINATE_SYSTEM")
-      .value("Coordinate_system_base",
+      .value("Base",
              COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE)
-      .value("Coordinate_system_tool",
+      .value("Tool",
              COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL)
-      .value("Coordinate_system_world",
+      .value("World",
              COORDINATE_SYSTEM::COORDINATE_SYSTEM_WORLD)
-      .value("Coordinate_system_user_min",
+      .value("User_min",
              COORDINATE_SYSTEM::COORDINATE_SYSTEM_USER_MIN)
-      .value("Coordinate_system_user_max",
+      .value("User_max",
              COORDINATE_SYSTEM::COORDINATE_SYSTEM_USER_MAX)
       .export_values();
 
@@ -488,7 +488,7 @@ void bind_drfl_enums(py::module_ &m) {
 
   // Enum for DR_MV_APP
   py::enum_<DR_MV_APP>(m, "DR_MV_APP")
-      .value("None", DR_MV_APP::DR_MV_APP_NONE)
+      .value("NoApp", DR_MV_APP::DR_MV_APP_NONE)
       .value("Weld", DR_MV_APP::DR_MV_APP_WELD)
       .export_values();
 

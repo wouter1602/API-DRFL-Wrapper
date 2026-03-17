@@ -161,7 +161,7 @@ void bGetCurrentPose(Class& c){
         [](DRAFramework::CDRFLEx& self, ROBOT_SPACE spaceType) {
             return self.get_current_pose(spaceType);
         },
-        py::arg("spaceType") = ROBOT_SPACE::ROBOT_SPACE_JOINT,
+        py::arg_v("space_type", ROBOT_SPACE::ROBOT_SPACE_JOINT, "ROBOT_SPACE.Joint"),
         "Get the current pose");
 }
 
@@ -194,7 +194,7 @@ void bGetCurrentPosx(Class& c){
         [](DRAFramework::CDRFLEx& self, COORDINATE_SYSTEM coodType) {
             return self.get_current_posx(coodType);
         },
-        py::arg("coodType") = COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
+        py::arg_v("coodType", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"),
         "Get the current position in Cartesian space");
 }
 
@@ -203,7 +203,7 @@ void bGetDesiredPosx(Class& c){
         [](DRAFramework::CDRFLEx& self, COORDINATE_SYSTEM coodType) {
             return self.get_desired_posx(coodType);
         },
-        py::arg("coodType") = COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
+        py::arg_v("coodType", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"),
         "Get the desired position in Cartesian space");
 }
 
@@ -260,7 +260,7 @@ void bGetToolForce(Class& c){
         [](DRAFramework::CDRFLEx& self, COORDINATE_SYSTEM targetRef) {
             return self.get_tool_force(targetRef);
         },
-        py::arg("targetRef") = COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
+        py::arg_v("targetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"),
         "Get the tool force");
 }
 
@@ -331,7 +331,7 @@ void bGetCurrentRotm(Class& c){
 
             return result;
         },
-        py::arg("targetRef") = COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
+        py::arg_v("targetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"),
         "Get the current rotation matrix");
 }
 
@@ -650,7 +650,7 @@ void bManageAccessControl(Class& c) {
         [](DRAFramework::CDRFLEx& self, MANAGE_ACCESS_CONTROL accessControl) {
             return self.manage_access_control(accessControl);
         },
-        py::arg("accessControl") = MANAGE_ACCESS_CONTROL::MANAGE_ACCESS_CONTROL_REQUEST,
+        py::arg_v("access_control", MANAGE_ACCESS_CONTROL::MANAGE_ACCESS_CONTROL_REQUEST, "MANAGE_ACCESS_CONTROL.Request"),
         "Manage access control");
 }
 
@@ -671,7 +671,7 @@ void bMoveHome(Class& c){
         [](DRAFramework::CDRFLEx& self, MOVE_HOME mode, unsigned char run) {
             return self.move_home();
         },
-        py::arg("mode") = MOVE_HOME::MOVE_HOME_MECHANIC,
+        py::arg_v("mode", MOVE_HOME::MOVE_HOME_MECHANIC, "MOVE_HOME.Mechanic"),
         py::arg("run") = (unsigned char)1,
         "Move the robot to home position");
 }
@@ -693,11 +693,9 @@ void bMovej(Class& c) {
                             blendingType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
         py::arg("blending_radius") = 0.f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
-        "Movej array command");
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"));
 
     c.def(
         "movej",
@@ -717,10 +715,9 @@ void bMovej(Class& c) {
                             blendingRadius, blendingType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
         py::arg("blending_radius") = 0.f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
         "Movej array command");
 }
 
@@ -745,12 +742,12 @@ void bMovel(Class& c) {
               blendingRadius, blendingType, appType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
         py::arg("blending_radius") = 0.f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
-        py::arg("app_type") = DR_MV_APP::DR_MV_APP_NONE, "Movel command");
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
+        py::arg_v("app_type", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"),
+        "Movel command");
 }
 
 // movejx function
@@ -769,11 +766,10 @@ void bMovejx(Class& c) {
         },
         py::arg("pos"), py::arg("solution_space"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
         py::arg("blending_radius") = 0.1f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
         "movejx command");
 
     c.def(
@@ -796,11 +792,10 @@ void bMovejx(Class& c) {
         },
         py::arg("pos"), py::arg("solution_space"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
         py::arg("blending_radius") = 0.1f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
         "movejx command");
 }
 
@@ -836,14 +831,13 @@ void bMovec(Class& c){
               blendingRadius, blendingType, orientation, appType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
         py::arg("target_angle1") = 0.f, py::arg("target_angle2") = 0.f,
         py::arg("blending_radius") = 0.f,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
-        py::arg("orientation") = MOVE_ORIENTATION::DR_MV_ORI_TEACH,
-        py::arg("app_type") = DR_MV_APP::DR_MV_APP_NONE);
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
+        py::arg_v("orientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH, "MOVE_ORIENTATION.Teach"),
+        py::arg_v("app_type", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
 }
 
 // movesj functions
@@ -869,7 +863,7 @@ void bMovesj(Class& c){
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"));
 
     // -------------------------------------------------------------------------
     // movesj - array vel/acc overload
@@ -899,7 +893,7 @@ void bMovesj(Class& c){
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"));
 }
 
 void bMovesx(Class& c){
@@ -932,9 +926,9 @@ void bMovesx(Class& c){
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
-        py::arg("eVelOpt") = SPLINE_VELOCITY_OPTION_DEFAULT);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.ABSOLUTE"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
+        py::arg_v("eVelOpt", SPLINE_VELOCITY_OPTION::SPLINE_VELOCITY_OPTION_DEFAULT, "SPLINE_VELOCITY_OPTION.Default"));
 }
 
 void bMoveb(Class &c) {
@@ -963,9 +957,9 @@ void bMoveb(Class &c) {
         },
         py::arg("tTargetPos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
-        py::arg("eAppType") = DR_MV_APP_NONE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.ABSOLUTE"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
+        py::arg_v("eAppType", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
 }
 
 void bMoveSpiral(Class& c){
@@ -993,7 +987,7 @@ void bMoveSpiral(Class& c){
         py::arg("fMaximuRadius"), py::arg("fMaximumLength"),
         py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_reference") = MOVE_REFERENCE_TOOL);
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"));
 
     // -------------------------------------------------------------------------
     // move_spiral - target position overload
@@ -1021,10 +1015,10 @@ void bMoveSpiral(Class& c){
         py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("pos"),
         py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_reference") = MOVE_REFERENCE_TOOL,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eSpiralDir") = DR_SPIRAL_OUTWARD,
-        py::arg("eRotDir") = DR_ROT_FORWARD);
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"),
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.ABSOLUTE"),
+        py::arg_v("eSpiralDir", SPIRAL_DIR::DR_SPIRAL_OUTWARD, "SPIRAL_DIR.Outward"),
+        py::arg_v("eRotDir", ROT_DIR::DR_ROT_FORWARD, "ROT_DIR.Forward"));
 }
 
 void bMovePeriodic(Class& c){
@@ -1045,8 +1039,11 @@ void bMovePeriodic(Class& c){
                                     fPeriodic.mutable_data(), fAccelTime,
                                     nRepeat, eMoveReference);
         },
-        py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
-        py::arg("nRepeat"), py::arg("move_reference") = MOVE_REFERENCE_TOOL);
+        py::arg("fAmplitude"), 
+        py::arg("fPeriodic"), 
+        py::arg("fAccelTime"),
+        py::arg("nRepeat"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"));
 }
 
 void bAmovej(Class& c) {
@@ -1068,9 +1065,8 @@ void bAmovej(Class& c) {
                             blendingType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE::MOVE_MODE_ABSOLUTE,
-        py::arg("blending_type") =
-            BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
         "Amovej array command");
     c.def(
         "amovej",
@@ -1092,10 +1088,8 @@ void bAmovej(Class& c) {
                              eMoveMode, eBlendingType);
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("blending_type") = BLENDING_SPEED_TYPE_DUPLICATE);
-
-
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("blending_type", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"));
 }
 
 void bAmovel(Class& c) {
@@ -1124,10 +1118,10 @@ void bAmovel(Class& c) {
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
-        py::arg("eBlendingType") = BLENDING_SPEED_TYPE_DUPLICATE,
-        py::arg("eAppType") = DR_MV_APP_NONE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
+        py::arg_v("eBlendingType", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
+        py::arg_v("eAppType", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
 }
 
 void bAmovec(Class& c) {
@@ -1162,12 +1156,12 @@ void bAmovec(Class& c) {
         },
         py::arg("pos"), py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
         py::arg("fTargetAngle1") = 0.f, py::arg("fTargetAngle2") = 0.f,
-        py::arg("eBlendingType") = BLENDING_SPEED_TYPE_DUPLICATE,
-        py::arg("eOrientation") = DR_MV_ORI_TEACH,
-        py::arg("eAppType") = DR_MV_APP_NONE);
+        py::arg_v("eBlendingType", BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE, "BLENDING_SPEED_TYPE.Duplicate"),
+        py::arg_v("eOrientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH, "MOVE_ORIENTATION.Teach"),
+        py::arg_v("eAppType", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
 }
 
 void bAmovesj(Class& c) {
@@ -1192,7 +1186,7 @@ void bAmovesj(Class& c) {
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"));
 
     // -------------------------------------------------------------------------
     // amovesj - array vel/acc overload
@@ -1222,7 +1216,7 @@ void bAmovesj(Class& c) {
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"));
 }
 
 void bAmovesx(Class& c) {
@@ -1256,9 +1250,9 @@ void bAmovesx(Class& c) {
         },
         py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
-        py::arg("eVelOpt") = SPLINE_VELOCITY_OPTION_DEFAULT);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.ABSOLUTE"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
+        py::arg_v("eVelOpt", SPLINE_VELOCITY_OPTION::SPLINE_VELOCITY_OPTION_DEFAULT, "SPLINE_VELOCITY_OPTION.Default"));
 }
 
 void bAmoveb(Class& c){
@@ -1287,9 +1281,9 @@ void bAmoveb(Class& c){
         },
         py::arg("tTargetPos"), py::arg("pos_count"), py::arg("vel"),
         py::arg("acc"), py::arg("time") = 0.f,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("move_reference") = MOVE_REFERENCE_BASE,
-        py::arg("eAppType") = DR_MV_APP_NONE);
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE, "MOVE_REFERENCE.Base"),
+        py::arg_v("eApptype", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
 }
 
 void bAmoveSpiral(Class& c) {
@@ -1317,7 +1311,7 @@ void bAmoveSpiral(Class& c) {
         py::arg("fMaximuRadius"), py::arg("fMaximumLength"),
         py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_reference") = MOVE_REFERENCE_TOOL);
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"));
 
     // -------------------------------------------------------------------------
     // amove_spiral - target position overload
@@ -1345,10 +1339,10 @@ void bAmoveSpiral(Class& c) {
         py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("pos"),
         py::arg("vel"), py::arg("acc"),
         py::arg("time") = 0.f,
-        py::arg("move_reference") = MOVE_REFERENCE_TOOL,
-        py::arg("move_mode") = MOVE_MODE_ABSOLUTE,
-        py::arg("eSpiralDir") = DR_SPIRAL_OUTWARD,
-        py::arg("eRotDir") = DR_ROT_FORWARD);
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"),
+        py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("eSpiralDir", SPIRAL_DIR::DR_SPIRAL_OUTWARD, "SPIRAL_DIR.Outward"),
+        py::arg_v("eRotDir", ROT_DIR::DR_ROT_FORWARD, "ROT_DIR.Forward"));
 }
 
 void bAmovePeriodic(Class& c){
@@ -1370,7 +1364,8 @@ void bAmovePeriodic(Class& c){
                                      nRepeat, eMoveReference);
         },
         py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
-        py::arg("nRepeat"), py::arg("move_reference") = MOVE_REFERENCE_TOOL);
+        py::arg("nRepeat"), 
+        py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL, "MOVE_REFERENCE.Tool"));
 }
 
 void bStop(Class& c) {
@@ -1382,7 +1377,7 @@ void bStop(Class& c) {
         [](DRAFramework::CDRFLEx &self, STOP_TYPE eStopType) {
           return self.stop(eStopType);
         },
-        py::arg("eStopType") = STOP_TYPE_QUICK)
+        py::arg_v("eStopType", STOP_TYPE::STOP_TYPE_QUICK, "STOP_TYPE.Quick"))
     .def("move_pause", [](DRAFramework::CDRFLEx &self) { return self.move_pause(); })
     .def("move_resume", [](DRAFramework::CDRFLEx &self) { return self.move_resume(); })
     .def("mwait", [](DRAFramework::CDRFLEx &self) { return self.mwait(); });
@@ -1406,8 +1401,8 @@ void bTrans(Class& c) {
                             eSourceRef, eTargetRef);
         },
         py::arg("fSourcePos"), py::arg("fOffset"),
-        py::arg("eSourceRef") = COORDINATE_SYSTEM_BASE,
-        py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("eSourceRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"),
+        py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 }
 
 void bFkin(Class& c) {
@@ -1422,7 +1417,8 @@ void bFkin(Class& c) {
                 "fSourcePos must have exactly NUM_JOINT elements");
           return self.fkin(fSourcePos.mutable_data(), eTargetRef);
         },
-        py::arg("fSourcePos"), py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg("fSourcePos"),
+        py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 }
 
 void bIkine(Class& c) {
@@ -1440,7 +1436,8 @@ void bIkine(Class& c) {
                            eTargetRef);
         },
         py::arg("fSourcePos"), py::arg("iSolutionSpace"),
-        py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
+        
 
     // -------------------------------------------------------------------------
     // ikin - returns LPINVERSE_KINEMATIC_RESPONSE (iRefPosOpt overload)
@@ -1565,7 +1562,8 @@ void bServoj(Class& c) {
               fLimitAcc.mutable_data(), fTargetTime, eTargetMod);
         },
         py::arg("pos"), py::arg("fLimitVel"), py::arg("fLimitAcc"),
-        py::arg("time"), py::arg("eTargetMod") = DR_SERVO_OVERRIDE);
+        py::arg("time"), 
+        py::arg_v("eTargetMod", DR_SERVOJ_TYPE::DR_SERVO_OVERRIDE, "DR_SERVOJ_TYPE.Override"));
 }
 
 void bServol(Class& c) {
@@ -1925,7 +1923,7 @@ void bSetModeAnalogInput(Class& c) {
             return self.set_mode_analog_input(eGpioIndex, eAnalogType);
         },
         py::arg("eGpioIndex"),
-        py::arg("eAnalogType") = GPIO_ANALOG_TYPE_CURRENT);
+        py::arg_v("orientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH, "MOVE_ORIENTATION.Teach"));
 }
 
 // bool set_mode_analog_output(GPIO_CTRLBOX_ANALOG_INDEX eGpioIndex, GPIO_ANALOG_TYPE eAnalogType)
@@ -1938,7 +1936,7 @@ void bSetModeAnalogOutput(Class& c) {
             return self.set_mode_analog_output(eGpioIndex, eAnalogType);
         },
         py::arg("eGpioIndex"),
-        py::arg("eAnalogType") = GPIO_ANALOG_TYPE_CURRENT);
+        py::arg_v("orientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH, "MOVE_ORIENTATION.Teach"));
 }
 
 // bool set_analog_output(GPIO_CTRLBOX_ANALOG_INDEX eGpioIndex, float fValue)
@@ -2027,9 +2025,9 @@ void bFlangeSerialOpen(Class& c) {
         },
         py::arg("nPort"),
         py::arg("baudrate")  = 115200,
-        py::arg("eByteSize") = BYTE_SIZE_EIGHTBITS,
-        py::arg("eParity")   = PARITY_CHECK_NONE,
-        py::arg("eStopBits") = STOPBITS_ONE);
+        py::arg_v("eByteSize", BYTE_SIZE::BYTE_SIZE_EIGHTBITS, "BYTE_SIZE.EightBites"),
+        py::arg_v("eParity", PARITY_CHECK::PARITY_CHECK_NONE, "PARITY_CHECK.none"),
+        py::arg_v("eStopBits", STOP_BITS::STOPBITS_ONE, "STOP_BITS.One"));
 }
 
 // bool flange_serial_close(int nPort)
@@ -2194,7 +2192,8 @@ void bParallelAxis(Class& c) {
                 eTaskAxis, eSourceRef);
         },
         py::arg("fTargetPos1"), py::arg("fTargetPos2"), py::arg("fTargetPos3"),
-        py::arg("eTaskAxis"), py::arg("eSourceRef") = COORDINATE_SYSTEM_BASE);
+        py::arg("eTaskAxis"), 
+        py::arg_v("eSourceRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.BASE"));
 
     c.def("parallel_axis",
         [](DRAFramework::CDRFLEx& self,
@@ -2233,7 +2232,7 @@ void bAlignAxis(Class& c) {
         },
         py::arg("fTargetPos1"), py::arg("fTargetPos2"), py::arg("fTargetPos3"),
         py::arg("fSourceVec"), py::arg("eTaskAxis"),
-        py::arg("eSourceRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("eSourceRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 
     c.def("align_axis",
         [](DRAFramework::CDRFLEx& self,
@@ -2278,7 +2277,7 @@ void bTaskComplianceCtrl(Class& c) {
                 eForceReference, fTargetTime);
         },
         py::arg("fTargetStiffness"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"),
         py::arg("time")     = 0.f);
 }
 
@@ -2304,7 +2303,7 @@ void bSetStiffnessx(Class& c) {
                 eForceReference, fTargetTime);
         },
         py::arg("fTargetStiffness"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"),
         py::arg("time")     = 0.f);
 }
 
@@ -2353,7 +2352,7 @@ void bSetUserCartCoord(Class& c) {
                 eTargetRef);
         },
         py::arg("iReqId"), py::arg("pos"),
-        py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 
     c.def("set_user_cart_coord",
         [](DRAFramework::CDRFLEx& self,
@@ -2380,7 +2379,7 @@ void bSetUserCartCoord(Class& c) {
             }
         },
         py::arg("pos"), py::arg("fTargetOrg"),
-        py::arg("fTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("fTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 }
 
 // int overwrite_user_cart_coord(bool bTargetUpdate, int iReqId,
@@ -2399,7 +2398,7 @@ void bOverwriteUserCartCoord(Class& c) {
                 eTargetRef);
         },
         py::arg("bTargetUpdate"), py::arg("iReqId"), py::arg("pos"),
-        py::arg("eTargetRef") = COORDINATE_SYSTEM_BASE);
+        py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE, "COORDINATE_SYSTEM.Base"));
 }
 
 // LPUSER_COORDINATE get_user_cart_coord(int iReqId)
@@ -2434,9 +2433,9 @@ void bSetDesiredForce(Class& c) {
                 eForceReference, fTargetTime, eForceMode);
         },
         py::arg("fTargetForce"), py::arg("iTargetDirection"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL,
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"),
         py::arg("time")     = 0.f,
-        py::arg("eForceMode")      = FORCE_MODE_ABSOLUTE);
+        py::arg_v("eForceMode", FORCE_MODE::FORCE_MODE_ABSOLUTE, "FORCE_MODE.Absolute"));
 }
 
 // bool release_force(float fTargetTime)
@@ -2460,7 +2459,7 @@ void bCheckPositionConditionAbs(Class& c) {
                 eForceAxis, fTargetMin, fTargetMax, eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 }
 
 // bool check_position_condition_rel(FORCE_AXIS eForceAxis, float fTargetMin, float fTargetMax,
@@ -2480,7 +2479,7 @@ void bCheckPositionConditionRel(Class& c) {
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
         py::arg("pos"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 }
 
 // bool check_position_condition(FORCE_AXIS eForceAxis, float fTargetMin, float fTargetMax,
@@ -2501,8 +2500,8 @@ void bCheckPositionCondition(Class& c) {
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
         py::arg("pos"),
-        py::arg("eMode")           = MOVE_MODE_ABSOLUTE,
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eMove", MOVE_MODE::MOVE_MODE_ABSOLUTE, "MOVE_MODE.Absolute"),
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 }
 
 // bool check_force_condition(FORCE_AXIS eForceAxis, float fTargetMin, float fTargetMax,
@@ -2517,7 +2516,7 @@ void bCheckForceCondition(Class& c) {
                 eForceAxis, fTargetMin, fTargetMax, eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 }
 
 // Overload 1: bool check_orientation_condition(FORCE_AXIS eForceAxis,
@@ -2540,7 +2539,7 @@ void bCheckOrientationCondition(Class& c) {
                 eForceReference);
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 
     c.def("check_orientation_condition",
         [](DRAFramework::CDRFLEx& self,
@@ -2557,7 +2556,7 @@ void bCheckOrientationCondition(Class& c) {
         },
         py::arg("eForceAxis"), py::arg("fTargetMin"), py::arg("fTargetMax"),
         py::arg("pos"),
-        py::arg("eForceReference") = COORDINATE_SYSTEM_TOOL);
+        py::arg_v("eForceReference", COORDINATE_SYSTEM::COORDINATE_SYSTEM_TOOL, "COORDINATE_SYSTEM.Tool"));
 }
 
 // LPROBOT_POSE coord_transform(float fTargetPos[NUM_TASK],
