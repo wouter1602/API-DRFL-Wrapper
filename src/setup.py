@@ -1,252 +1,239 @@
-
 #!/usr/bin/env python3
- 
+"""
+Dynamic build configuration for doosan_drfl.
+Static metadata lives in pyproject.toml; this file handles only the parts
+that cannot be expressed in TOML: OS/arch detection, the C++ extension
+definition, and custom build commands.
+"""
+
 import os
 import sys
 import platform
 import subprocess
+import shutil
 import pybind11
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
- 
-def get_library_dir():
+
+
+# ---------------------------------------------------------------------------
+# Platform / architecture helpers
+# ---------------------------------------------------------------------------
+
+def get_build_config():
     """
-    Dynamically determin the libary directory based on OS, Arch, and Version.
+    Return library_dirs, libraries, and extra_link_args for the current
+    OS and architecture.
     """
- 
-    system = sys.platform
+    system  = sys.platform
     machine = platform.machine()
- 
+
     arch_map = {
-    'x86_64': 'amd64',
-    'AMD64': 'amd64',
-    'aarch64': 'arm64',
-    'arm64': 'arm64',
-    'i386': '32bits',
-    'i6886': '32bits'
+        'x86_64': 'amd64', 'AMD64':   'amd64',
+        'aarch64': 'arm64', 'arm64':   'arm64',
+        'i386':   '32bits', 'i686':    '32bits',
     }
- 
-    arch = arch_map.get(machine, 'unknown')
- 
+    arch      = arch_map.get(machine, 'unknown')
     base_path = "../library/API-DRFL/library"
- 
+
+    # --- Windows -----------------------------------------------------------
     if system == 'win32':
-        # System is Windows
-        if arch == 'amd64': #64-bits Windows
-            return os.path.join(base_path, 'Windows', '64bits')
-        elif arch == '32bits': #32-bits Windows
-            return os.path.join(base_path, 'Windows', '32bits')
+        if arch == 'amd64':
+            lib_dir = os.path.join(base_path, 'Windows', '64bits')
+        elif arch == '32bits':
+            lib_dir = os.path.join(base_path, 'Windows', '32bits')
         else:
             raise ValueError(f"Unsupported Windows architecture: {machine}")
- 
+
+        return {
+            'library_dirs':    [lib_dir],
+            'libraries':       ['DRFLWin64', 'PocoFoundation64', 'PocoNet64'],
+            'extra_link_args': [],
+        }
+
+    # --- Linux -------------------------------------------------------------
     elif system == 'linux':
-        # System is Linux
- 
-        dist_name = None
-        dist_version = None
- 
+        dist_name = dist_version = None
         try:
             import distro
-            dist_name = distro.id()
-            dist_version = distro.version()
+            dist_name, dist_version = distro.id(), distro.version()
         except ImportError:
             if os.path.exists('/etc/os-release'):
                 with open('/etc/os-release') as f:
                     for line in f:
                         if line.startswith('ID='):
-                            dist_name = line.split('=')[1].strip().strip('"')
+                            dist_name    = line.split('=')[1].strip().strip('"')
                         elif line.startswith('VERSION_ID='):
                             dist_version = line.split('=')[1].strip().strip('"')
- 
+
+        supported_ubuntu = ['18.04', '20.04', '22.04', '24.04']
+        newest_ubuntu    = '24.04'
+
         if dist_name == 'ubuntu':
-            # Mapping for specific Ubuntu version
-            if dist_version in ['18.04', '20.04', '22.04', '24.04']:
-                if arch in ['amd64', 'arm64']:
-                    return os.path.join(base_path, 'Linux/64bits', arch, dist_version)
-                else:
-                    raise ValueError(f"Unsupported Ubuntu architecture: {machine}")
-            else:
-                raise ValueError(f"Unsupported Ubuntu version: {dist_version}. Supported: 18.04, 20.04, 22.04, 24.04")
- 
-        if arch in ['amd64', 'arm64']: # Generic Linux fallback (Not Ubuntu)
-            return os.path.join(base_path, 'Linux/64bits', arch, 'generic')
-        else:
-            raise ValueError(f"Unsupported Linux architecture: {machine}")
-    else:
-        raise OSError(f"Unsupported operating system: {system}")
- 
- 
+            if dist_version not in supported_ubuntu:
+                raise ValueError(
+                    f"Unsupported Ubuntu version: {dist_version}. "
+                    f"Supported: {', '.join(supported_ubuntu)}"
+                )
+            if arch not in ('amd64', 'arm64'):
+                raise ValueError(f"Unsupported Ubuntu architecture: {machine}")
+
+            return {
+                'library_dirs':    [os.path.join(base_path, 'Linux/64bits', arch, dist_version)],
+                'libraries':       ['DRFL', 'PocoFoundation', 'PocoNet'],
+                'extra_link_args': [],
+            }
+
+        # Generic Linux (Arch, Fedora, Debian, …)
+        if arch in ('amd64', 'arm64'):
+            generic_dir = os.path.join(base_path, 'Linux/64bits', arch, 'generic')
+            poco_dir    = os.path.join(base_path, 'Linux/64bits', arch, newest_ubuntu)
+            print(
+                f"ℹ️  Generic Linux: bundled Poco from Ubuntu {newest_ubuntu} will be used."
+            )
+            return {
+                'library_dirs':    [generic_dir, poco_dir],
+                'libraries':       ['DRFL', 'PocoFoundation', 'PocoNet'],
+                'extra_link_args': [f'-Wl,-rpath,{os.path.abspath(poco_dir)}'],
+            }
+
+        raise ValueError(f"Unsupported Linux architecture: {machine}")
+
+    raise OSError(f"Unsupported operating system: {system}")
+
+
+# ---------------------------------------------------------------------------
+# Custom commands
+# ---------------------------------------------------------------------------
+
 class BuildExtWithStubs(build_ext):
-    """
-    Custom build_ext that generates .pyi stubs after compilation.
-    """
- 
+    """Generate .pyi stubs after the extension is compiled."""
+
     def run(self):
-        # First, run the standard build_ext
         super().run()
- 
-        module_name = 'doosan_drfl'
- 
-        self.generate_stubs(module_name)
- 
-    def generate_stubs(self, module_name):
-        """
-        Attempt to generate .pyi stubs using available tools.
-        Falls back gracefully if tools aren't available.
-        """
- 
+        self._generate_stubs('doosan_drfl')
+
+    def _generate_stubs(self, module_name):
         stub_generators = [
-            ('pybind11_stubgen', 'pybind11-stubgen'), # Best option
-            ('stubgen', 'mypy') # Fallbacck
+            ('pybind11_stubgen', 'pybind11-stubgen'),
+            ('stubgen',          'mypy'),
         ]
- 
+        stub_dir  = os.path.join(os.path.dirname(__file__), 'stubs')
         stub_file = f"{module_name}.pyi"
-        stub_dir = os.path.join(os.path.dirname(__file__), 'stubs')
- 
+
         for generator, package_name in stub_generators:
             try:
-                # Check if the tool is available
-                result = subprocess.run(
-                    [ sys.executable, '-m', generator, '--help'],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                probe = subprocess.run(
+                    [sys.executable, '-m', generator, '--help'],
+                    capture_output=True, text=True, timeout=10,
                 )
+                if probe.returncode != 0:
+                    continue
+
+                print(f"\n{'='*60}\nGenerating stubs with {generator}...\n{'='*60}")
+                os.makedirs(stub_dir, exist_ok=True)
+
+                cmd = (
+                    [sys.executable, '-m', generator, module_name, '-o', stub_dir]
+                    if generator == 'pybind11_stubgen'
+                    else [sys.executable, '-m', generator, '-m', module_name, '-o', stub_dir]
+                )
+                result = subprocess.run(cmd, capture_output=True, text=True)
+
                 if result.returncode == 0:
-                    print(f"\n{'='*60}")
-                    print(f"Generating stubs using {generator}...")
-                    print(f"\n{'='*60}")
- 
-                    os.makedirs(stub_dir, exist_ok=True) #Create stubs dir if not exist
- 
-                    if generator == 'pybind11_stubgen':
-                        cmd = [
-                            sys.executable, '-m', generator,
-                            module_name,
-                            '-o', stub_dir,
-                        ]
-                    else: # stubgen
-                        cmd = [
-                            sys.executable, '-m', generator,
-                            '-m', module_name,
-                            '-o', stub_dir
-                        ]
- 
-                    result = subprocess.run(cmd, capture_output=True, text=True)
- 
-                    if result.returncode == 0:
-                        print(f"✔️ Successfully generated {stub_file}")
-                        print(f"  Location: {stub_dir}/{stub_file}")
- 
-                        # Move the stub file to the Module directory for IDe discorvery
-                        src_stub = os.path.join(stub_dir, stub_file)
-                        dst_stub = os.path.join(os.path.dirname(__file__), stub_file)
- 
-                        if os.path.exists(src_stub):
-                            import shutil
-                            shutil.copy2(src_stub, dst_stub)
-                            print(f"  Copied to: {dst_stub}")
- 
-                        return True
- 
-                    else:
-                        print(f"❌ {generator} failed:")
-                        print(result.stderr)
-            except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
-                print(f"⚠️ {generator} not available or failed: {e}")
-                continue
-        print(f"\n⚠️ Could not generate stubs automatically.")
-        print(f"  To enable automatic stub generation, install one of:")
-        print(f"    pip install pybind11-stubgen (preferred)")
-        print(f"    pip install mypy             (fallback)")
-        print(f"\n   Then run: python setup.py build-ext --inplace")
- 
+                    src = os.path.join(stub_dir, stub_file)
+                    dst = os.path.join(os.path.dirname(__file__), stub_file)
+                    if os.path.exists(src):
+                        shutil.copy2(src, dst)
+                    print(f"✔️  Stubs written to {dst}")
+                    return True
+
+                print(f"❌ {generator} failed:\n{result.stderr}")
+
+            except Exception as exc:
+                print(f"⚠️  {generator} unavailable: {exc}")
+
+        print(
+            "\n⚠️  Could not generate stubs automatically.\n"
+            "   Install one of:\n"
+            "     pip install pybind11-stubgen   (preferred)\n"
+            "     pip install mypy               (fallback)\n"
+            "   Then re-run: python setup.py build_ext --inplace"
+        )
         return False
- 
- 
+
+
 class InstallToVenv(install):
     """
-    Custom command: builds the extension and installs it into the currently
-    active virtual environment so it is importable from any folder.
- 
+    Build and install doosan_drfl into the active virtual environment.
+
     Usage:
         python setup.py install_venv
     """
- 
+
     description = 'Build and install doosan_drfl into the active virtual environment'
- 
+
     def run(self):
         venv = os.environ.get('VIRTUAL_ENV')
- 
         if not venv:
-            print("\n❌ No active virtual environment detected.")
-            print("   Activate a venv first:  source /path/to/venv/bin/activate")
-            print("   Then re-run:            python setup.py install_venv")
+            print(
+                "\n❌ No active virtual environment detected.\n"
+                "   Activate one first:  source /path/to/venv/bin/activate\n"
+                "   Then re-run:         python setup.py install_venv"
+            )
             sys.exit(1)
- 
-        print(f"\n{'='*60}")
-        print(f"Installing into venv: {venv}")
-        print(f"Python interpreter:   {sys.executable}")
-        print(f"{'='*60}\n")
- 
-        # pip install . is the cleanest way: it builds *and* registers the
-        # package in site-packages, so `import doosan_drfl` works everywhere.
+
+        print(f"\n{'='*60}\nInstalling into venv : {venv}\nInterpreter          : {sys.executable}\n{'='*60}\n")
         result = subprocess.run(
             [sys.executable, '-m', 'pip', 'install', '.', '--no-build-isolation'],
             cwd=os.path.dirname(os.path.abspath(__file__)),
         )
- 
-        if result.returncode == 0:
-            print(f"\n✔️  doosan_drfl installed successfully.")
-            print(f"   You can now 'import doosan_drfl' from any directory")
-            print(f"   while this venv is active.")
-        else:
+        if result.returncode != 0:
             print(f"\n❌ Installation failed (exit code {result.returncode}).")
             sys.exit(result.returncode)
- 
- 
+        print("\n✔️  doosan_drfl installed. 'import doosan_drfl' now works from any directory.")
+
+
+# ---------------------------------------------------------------------------
+# Extension
+# ---------------------------------------------------------------------------
+
 try:
-    lib_dir = get_library_dir()
-    abs_lib_dir = os.path.abspath(lib_dir)
-    print(f"Detected library directory: {abs_lib_dir}")
-except Exception as e:
-    print(f"Error detecting library directory: {e}")
+    build_cfg        = get_build_config()
+    abs_library_dirs = [os.path.abspath(d) for d in build_cfg['library_dirs']]
+    print("Library directories:")
+    for d in abs_library_dirs:
+        print(f"  {d}")
+except Exception as exc:
+    print(f"Error detecting library configuration: {exc}")
     sys.exit(1)
- 
+
 ext_modules = [
     Extension(
-        'doosan_drfl',                      # Name of the generated Python module
-        ['./drfl_wrapper.cpp',
-         './cdrflex_bindings.cpp',
-         './drfl_structs.cpp',
-         './drfl_enums.cpp'],                # Your pybind11 C++ file
+        'doosan_drfl',
+        sources=[
+            './drfl_wrapper.cpp',
+            './cdrflex_bindings.cpp',
+            './drfl_structs.cpp',
+            './drfl_enums.cpp',
+        ],
         include_dirs=[
             pybind11.get_include(),
-            '../library/API-DRFL/include'            # Path to Doosan DRFL.h
+            '../library/API-DRFL/include',
         ],
-        library_dirs=[                      # TODO make variable based on ubuntu version
-            abs_lib_dir,          # Path to Doosan libDRFL.a / POCO libs
-        ],
-        libraries=[
-            'DRFL',                         # Links libDRFL.a / .so
-            'PocoFoundation',               # Doosan dependency
-            'PocoNet',                      # Doosan dependency
-        ],
+        library_dirs=abs_library_dirs,
+        libraries=build_cfg['libraries'],
         language='c++',
-        extra_compile_args=['-std=c++17', '-DDRCF_VERSION=2'],   # Ensure C++17 or higher
+        extra_compile_args=['-std=c++17', '-DDRCF_VERSION=2'],
+        extra_link_args=build_cfg['extra_link_args'],
     ),
 ]
- 
+
 setup(
-    name='doosan_drfl',
-    version='1.0',
-    description='Python wrapper for Doosan DRFL API',
     ext_modules=ext_modules,
     cmdclass={
-        'build_ext': BuildExtWithStubs,
-        'install_venv': InstallToVenv,      # python setup.py install_venv
+        'build_ext':    BuildExtWithStubs,
+        'install_venv': InstallToVenv,
     },
-    package_data={'doosan_drfl': ['*.pyi']},
-    include_package_data=True,
 )
