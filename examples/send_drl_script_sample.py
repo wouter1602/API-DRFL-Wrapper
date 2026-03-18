@@ -76,16 +76,6 @@ def main():
         print("Failed to get control access and/or robot is not in standby state")
         raise SystemError(1)
 
-    # Set robot system (Virtual or Real)
-    if VIRTUAL:
-        if not robot.set_robot_system(drfl.ROBOT_SYSTEM.Virtual):
-            print("Failed to set robot system to virtual")
-            raise SystemError(1)
-    else:
-        if not robot.set_robot_system(drfl.ROBOT_SYSTEM.Real):
-            print("Failed to set robot system to real")
-            raise SystemError(1)
-
     # Set robot mode (Autonomous) This enables the robot to execute autonomous motion.
     if not robot.set_robot_mode(drfl.ROBOT_MODE.Autonomous):
         print("Failed to set robot mode to autonomous")
@@ -93,7 +83,10 @@ def main():
 
     input("Press Enter to continue...")
 
-    robot.drl_start(drfl.ROBOT_SYSTEM.Real, STRINGDRL)
+    if VIRTUAL:
+        robot.drl_start(drfl.ROBOT_SYSTEM.Virtual, STRINGDRL)
+    else:
+        robot.drl_start(drfl.ROBOT_SYSTEM.Real, STRINGDRL)
 
     input("Press Enter to pause ...")
 

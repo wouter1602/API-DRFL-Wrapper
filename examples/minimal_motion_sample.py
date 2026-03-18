@@ -16,8 +16,8 @@ VIRTUAL = False # Will set the movement to be virtual (simulated)
 
 robot = drfl.CDRFLEx()
 
-get_control_access = False
-is_standby = False
+get_control_access: bool = False
+is_standby: bool = False
 
 
 """
