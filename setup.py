@@ -161,13 +161,39 @@ def _platform_extension_kwargs() -> dict:
 
     elif system.startswith("linux"):
         lib_dir = _select_linux_lib_dir()
-        return dict(
+
+        # Check if system Poco is available (non-Ubuntu distros)
+        ubuntu_ver = _ubuntu_version()
+        use_system_poco = ubuntu_ver is None  # not Ubuntu → use system libs
+
+        kwargs = dict(
             library_dirs=[str(lib_dir)],
-            libraries=["DRFL", "PocoFoundation", "PocoNet"],
-            runtime_library_dirs=[str(lib_dir)],  # embed RPATH
-            extra_link_args=[f"-Wl,-rpath,{lib_dir}"],
+            extra_objects=[str(lib_dir / "libDRFL.a")],  # always use vendored DRFL
+            extra_link_args=[],
             define_macros=[("DRFL_LINUX", None)],
         )
+
+        if use_system_poco:
+            # Let the linker find Poco from the system
+            kwargs["libraries"] = ["PocoFoundation", "PocoNet"]
+            print("[setup.py] Non-Ubuntu distro — linking against system Poco libraries")
+        else:
+            # Use vendored Poco .so files with embedded RPATH
+            kwargs["libraries"] = ["PocoFoundation", "PocoNet"]
+            kwargs["library_dirs"].append(str(lib_dir))
+            kwargs["extra_link_args"] = [f"-Wl,-rpath,{lib_dir}"]
+
+        return kwargs
+
+    # elif system.startswith("linux"):
+    #     lib_dir = _select_linux_lib_dir()
+    #     return dict(
+    #         library_dirs=[str(lib_dir)],
+    #         libraries=["DRFL", "PocoFoundation", "PocoNet"],
+    #         runtime_library_dirs=[str(lib_dir)],  # embed RPATH
+    #         extra_link_args=[f"-Wl,-rpath,{lib_dir}"],
+    #         define_macros=[("DRFL_LINUX", None)],
+    #     )
 
     elif system == "darwin":
         # macOS is not listed in the vendor tree; raise early with a clear message.
@@ -217,7 +243,8 @@ def build_extension() -> Extension:
         **platform_kwargs,
     )
 
-
 setup(
+    name="doosan_drfl",
+    version="1.0",
     ext_modules=[build_extension()],
 )

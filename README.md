@@ -9,6 +9,8 @@ This is a python wrapper for the [Doosan Robotics Framework Library](https://git
 - numpy
 - pybind11
 - pybind11-stubgen
+- wheel
+- build
 
 - distro (optional)
 
