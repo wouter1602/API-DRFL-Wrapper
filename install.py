@@ -101,7 +101,7 @@ def step_generate_stubs(verbose: bool) -> None:
     _run(cmd, cwd=HERE)
 
     # Copy generated stubs next to the installed package so IDEs pick them up.
-    generated = STUBS_DIR / "doosan_drfl"
+    generated = STUBS_DIR / "doosan_drfl.pyi"
     if generated.exists():
         stub_file = generated / "__init__.pyi"
         if not stub_file.exists():

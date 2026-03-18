@@ -1521,6 +1521,36 @@ void bind_drfl_structs(py::module_ &m) {
   // LOCAL / SAFETY_ZONE_PROPERTY structs (compact form)
   // ─────────────────────────────────────────────────────────────────────────
 
+  py::class_<LOCAL_ZONE_PROPERTY_COLLISION>(m, "LOCAL_ZONE_PROPERTY_COLLISION")
+      .def(py::init<>())
+      .def_readwrite("_iOverride",    &LOCAL_ZONE_PROPERTY_COLLISION::_iOverride)
+      .def_readwrite("_fSensitivity", &LOCAL_ZONE_PROPERTY_COLLISION::_fSensitivity);
+
+  py::class_<LOCAL_ZONE_PROPERTY_SPEED_RATE>(m, "LOCAL_ZONE_PROPERTY_SPEED_RATE")
+      .def(py::init<>())
+      .def_readwrite("_iOverride",  &LOCAL_ZONE_PROPERTY_SPEED_RATE::_iOverride)
+      .def_readwrite("_fSpeedRate", &LOCAL_ZONE_PROPERTY_SPEED_RATE::_fSpeedRate);
+
+  py::class_<LOCAL_ZONE_PROPERTY_TCP_FORCE>(m, "LOCAL_ZONE_PROPERTY_TCP_FORCE")
+      .def(py::init<>())
+      .def_readwrite("_iOverride", &LOCAL_ZONE_PROPERTY_TCP_FORCE::_iOverride)
+      .def_readwrite("_fForce",    &LOCAL_ZONE_PROPERTY_TCP_FORCE::_fForce);
+
+  py::class_<LOCAL_ZONE_PROPERTY_TCP_MOMENTUM>(m, "LOCAL_ZONE_PROPERTY_TCP_MOMENTUM")
+      .def(py::init<>())
+      .def_readwrite("_iOverride",  &LOCAL_ZONE_PROPERTY_TCP_MOMENTUM::_iOverride)
+      .def_readwrite("_fMomentum",  &LOCAL_ZONE_PROPERTY_TCP_MOMENTUM::_fMomentum);
+
+  py::class_<LOCAL_ZONE_PROPERTY_TCP_POWER>(m, "LOCAL_ZONE_PROPERTY_TCP_POWER")
+      .def(py::init<>())
+      .def_readwrite("_iOverride", &LOCAL_ZONE_PROPERTY_TCP_POWER::_iOverride)
+      .def_readwrite("_fPower",    &LOCAL_ZONE_PROPERTY_TCP_POWER::_fPower);
+
+  py::class_<LOCAL_ZONE_PROPERTY_TCP_SPEED>(m, "LOCAL_ZONE_PROPERTY_TCP_SPEED")
+      .def(py::init<>())
+      .def_readwrite("_iOverride", &LOCAL_ZONE_PROPERTY_TCP_SPEED::_iOverride)
+      .def_readwrite("_fSpeed",    &LOCAL_ZONE_PROPERTY_TCP_SPEED::_fSpeed);
+
   py::class_<LOCAL_ZONE_PROPERTY_JOINT_RANGE>(m,
                                               "LOCAL_ZONE_PROPERTY_JOINT_RANGE")
       .def(py::init<>()) ARRAY_PROP(LOCAL_ZONE_PROPERTY_JOINT_RANGE, _iOverride,
@@ -2193,4 +2223,221 @@ void bind_drfl_structs(py::module_ &m) {
       .def_readwrite("_iGprAddr", &IETHERNET_SLAVE_RESPONSE_DATA_EX::_iGprAddr)
       .def_readwrite("_iInOut", &IETHERNET_SLAVE_RESPONSE_DATA_EX::_iInOut)
           STR_PROP(IETHERNET_SLAVE_RESPONSE_DATA_EX, _szData);
+
+  py::class_<SAFETY_CONFIGURATION_EX2>(m, "SAFETY_CONFIGURATION_EX2")
+      .def(py::init<>())
+      // Primitives
+      .def_readwrite("_iDataVersion", &SAFETY_CONFIGURATION_EX2::_iDataVersion)
+      .def_readwrite("_fCollisionSensitivity",
+                     &SAFETY_CONFIGURATION_EX2::_fCollisionSensitivity)
+      .def_readwrite("m_CwsSpeedRatio",
+                     &SAFETY_CONFIGURATION_EX2::m_CwsSpeedRatio)
+      .def_readwrite("m_IoSpeedRatio",
+                     &SAFETY_CONFIGURATION_EX2::m_IoSpeedRatio)
+      .def_readwrite("_iSafetyZoneCount",
+                     &SAFETY_CONFIGURATION_EX2::_iSafetyZoneCount)
+      .def_readwrite("_iUserCoordCount",
+                     &SAFETY_CONFIGURATION_EX2::_iUserCoordCount)
+      // Nested structs
+      .def_readwrite("_tJointRange", &SAFETY_CONFIGURATION_EX2::_tJointRange)
+      .def_readwrite("_tGeneralRange",
+                     &SAFETY_CONFIGURATION_EX2::_tGeneralRange)
+      .def_readwrite("_tSafetyFunc", &SAFETY_CONFIGURATION_EX2::_tSafetyFunc)
+      .def_readwrite("_tTool", &SAFETY_CONFIGURATION_EX2::_tTool)
+      .def_readwrite("_tTcp", &SAFETY_CONFIGURATION_EX2::_tTcp)
+      .def_readwrite("_tInstallPose", &SAFETY_CONFIGURATION_EX2::_tInstallPose)
+      .def_readwrite("_tSafetyIO", &SAFETY_CONFIGURATION_EX2::_tSafetyIO)
+      .def_readwrite("_tSafetySpaceVF",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceVF)
+      .def_readwrite("_tSafetySpaceSZ",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceSZ)
+      .def_readwrite("_tSafetySpaceESZ",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceESZ)
+      .def_readwrite("_tSafetySpacePZ",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpacePZ)
+      .def_readwrite("_tSafetySpaceCM",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceCM)
+      .def_readwrite("_tSafetySpaceTO",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceTO)
+      .def_readwrite("_tSafetySpaceTS",
+                     &SAFETY_CONFIGURATION_EX2::_tSafetySpaceTS)
+      .def_readwrite("_tConfigNudge", &SAFETY_CONFIGURATION_EX2::_tConfigNudge)
+      .def_readwrite("_tCockPit", &SAFETY_CONFIGURATION_EX2::_tCockPit)
+      .def_readwrite("_tIdleOff", &SAFETY_CONFIGURATION_EX2::_tIdleOff)
+      .def_readwrite("_tConfigTCP", &SAFETY_CONFIGURATION_EX2::_tConfigTCP)
+      .def_readwrite("_tConfigTool", &SAFETY_CONFIGURATION_EX2::_tConfigTool)
+      .def_readwrite("_tConfigToolShape",
+                     &SAFETY_CONFIGURATION_EX2::_tConfigToolShape)
+      .def_readwrite("_tModbusList", &SAFETY_CONFIGURATION_EX2::_tModbusList)
+      .def_readwrite("_tWorld2BaseRelation",
+                     &SAFETY_CONFIGURATION_EX2::_tWorld2BaseRelation)
+      .def_readwrite("_tConfigurableIO",
+                     &SAFETY_CONFIGURATION_EX2::_tConfigurableIO)
+      // char[] → str
+      .def_property(
+          "_szActiveTcp",
+          [](const SAFETY_CONFIGURATION_EX2 &s) {
+            return std::string(s._szActiveTcp);
+          },
+          [](SAFETY_CONFIGURATION_EX2 &s, const std::string &v) {
+            std::strncpy(s._szActiveTcp, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveTcp[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      .def_property(
+          "_szActiveTool",
+          [](const SAFETY_CONFIGURATION_EX2 &s) {
+            return std::string(s._szActiveTool);
+          },
+          [](SAFETY_CONFIGURATION_EX2 &s, const std::string &v) {
+            std::strncpy(s._szActiveTool, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveTool[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      .def_property(
+          "_szActiveToolShape",
+          [](const SAFETY_CONFIGURATION_EX2 &s) {
+            return std::string(s._szActiveToolShape);
+          },
+          [](SAFETY_CONFIGURATION_EX2 &s, const std::string &v) {
+            std::strncpy(s._szActiveToolShape, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveToolShape[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      // Fixed-size arrays → list
+      .def_property(
+          "_tSafetyZone",
+          [](const SAFETY_CONFIGURATION_EX2 &s) {
+            py::list out;
+            for (int i = 0; i < 20; i++)
+              out.append(s._tSafetyZone[i]);
+            return out;
+          },
+          [](SAFETY_CONFIGURATION_EX2 &s, const py::list &lst) {
+            for (int i = 0; i < std::min<int>(20, py::len(lst)); i++)
+              s._tSafetyZone[i] = lst[i].cast<CONFIG_SAFETY_ZONE>();
+          })
+      .def_property(
+          "_tUserCoordinates",
+          [](const SAFETY_CONFIGURATION_EX2 &s) {
+            py::list out;
+            for (int i = 0; i < 100; i++)
+              out.append(s._tUserCoordinates[i]);
+            return out;
+          },
+          [](SAFETY_CONFIGURATION_EX2 &s, const py::list &lst) {
+            for (int i = 0; i < std::min<int>(100, py::len(lst)); i++)
+              s._tUserCoordinates[i] = lst[i].cast<CONFIG_USER_COORDINATE_EX>();
+          });
+
+  py::class_<SAFETY_CONFIGURATION_EX2_V3>(m, "SAFETY_CONFIGURATION_EX2_V3")
+      .def(py::init<>())
+      // Primitives
+      .def_readwrite("_iDataVersion",
+                     &SAFETY_CONFIGURATION_EX2_V3::_iDataVersion)
+      .def_readwrite("_fCollisionSensitivity",
+                     &SAFETY_CONFIGURATION_EX2_V3::_fCollisionSensitivity)
+      .def_readwrite("m_CwsSpeedRatio",
+                     &SAFETY_CONFIGURATION_EX2_V3::m_CwsSpeedRatio)
+      .def_readwrite("m_IoSpeedRatio",
+                     &SAFETY_CONFIGURATION_EX2_V3::m_IoSpeedRatio)
+      .def_readwrite("_iSafetyZoneCount",
+                     &SAFETY_CONFIGURATION_EX2_V3::_iSafetyZoneCount)
+      .def_readwrite("_iUserCoordCount",
+                     &SAFETY_CONFIGURATION_EX2_V3::_iUserCoordCount)
+      // Nested structs
+      .def_readwrite("_tJointRange", &SAFETY_CONFIGURATION_EX2_V3::_tJointRange)
+      .def_readwrite("_tGeneralRange",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tGeneralRange)
+      .def_readwrite("_tSafetyFunc", &SAFETY_CONFIGURATION_EX2_V3::_tSafetyFunc)
+      .def_readwrite("_tTool", &SAFETY_CONFIGURATION_EX2_V3::_tTool)
+      .def_readwrite(
+          "_tTcp", &SAFETY_CONFIGURATION_EX2_V3::_tTcp) // CONFIG_TCP_SYMBOL_EX
+      .def_readwrite("_tInstallPose",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tInstallPose)
+      .def_readwrite(
+          "_tSafetyIO",
+          &SAFETY_CONFIGURATION_EX2_V3::_tSafetyIO) // CONFIG_SAFETY_IO_EX
+      .def_readwrite("_tSafetySpaceVF",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceVF)
+      .def_readwrite("_tSafetySpaceSZ",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceSZ)
+      .def_readwrite("_tSafetySpaceESZ",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceESZ)
+      .def_readwrite("_tSafetySpacePZ",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpacePZ)
+      .def_readwrite("_tSafetySpaceCM",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceCM)
+      .def_readwrite("_tSafetySpaceTO",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceTO)
+      .def_readwrite("_tSafetySpaceTS",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tSafetySpaceTS)
+      .def_readwrite("_tConfigNudge",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tConfigNudge)
+      .def_readwrite("_tCockPit", &SAFETY_CONFIGURATION_EX2_V3::_tCockPit)
+      .def_readwrite("_tIdleOff", &SAFETY_CONFIGURATION_EX2_V3::_tIdleOff)
+      .def_readwrite(
+          "_tConfigTCP",
+          &SAFETY_CONFIGURATION_EX2_V3::_tConfigTCP) // CONFIG_TCP_LIST_EX
+      .def_readwrite("_tConfigTool", &SAFETY_CONFIGURATION_EX2_V3::_tConfigTool)
+      .def_readwrite("_tConfigToolShape",
+                     &SAFETY_CONFIGURATION_EX2_V3::_tConfigToolShape)
+      .def_readwrite("_tModbusList", &SAFETY_CONFIGURATION_EX2_V3::_tModbusList)
+      .def_readwrite("_tWorld2BaseRelation",
+                     &SAFETY_CONFIGURATION_EX2_V3::
+                         _tWorld2BaseRelation) // CONFIG_WORLD_COORDINATE_EX
+      .def_readwrite("_tConfigurableIO",
+                     &SAFETY_CONFIGURATION_EX2_V3::
+                         _tConfigurableIO) // CONFIG_CONFIGURABLE_IO_EX
+      // char[] → str
+      .def_property(
+          "_szActiveTcp",
+          [](const SAFETY_CONFIGURATION_EX2_V3 &s) {
+            return std::string(s._szActiveTcp);
+          },
+          [](SAFETY_CONFIGURATION_EX2_V3 &s, const std::string &v) {
+            std::strncpy(s._szActiveTcp, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveTcp[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      .def_property(
+          "_szActiveTool",
+          [](const SAFETY_CONFIGURATION_EX2_V3 &s) {
+            return std::string(s._szActiveTool);
+          },
+          [](SAFETY_CONFIGURATION_EX2_V3 &s, const std::string &v) {
+            std::strncpy(s._szActiveTool, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveTool[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      .def_property(
+          "_szActiveToolShape",
+          [](const SAFETY_CONFIGURATION_EX2_V3 &s) {
+            return std::string(s._szActiveToolShape);
+          },
+          [](SAFETY_CONFIGURATION_EX2_V3 &s, const std::string &v) {
+            std::strncpy(s._szActiveToolShape, v.c_str(), MAX_SYMBOL_SIZE - 1);
+            s._szActiveToolShape[MAX_SYMBOL_SIZE - 1] = '\0';
+          })
+      // Fixed-size arrays → list
+      .def_property(
+          "_tSafetyZone",
+          [](const SAFETY_CONFIGURATION_EX2_V3 &s) {
+            py::list out;
+            for (int i = 0; i < 20; i++)
+              out.append(s._tSafetyZone[i]);
+            return out;
+          },
+          [](SAFETY_CONFIGURATION_EX2_V3 &s, const py::list &lst) {
+            for (int i = 0; i < std::min<int>(20, py::len(lst)); i++)
+              s._tSafetyZone[i] = lst[i].cast<CONFIG_SAFETY_ZONE>();
+          })
+      .def_property(
+          "_tUserCoordinates",
+          [](const SAFETY_CONFIGURATION_EX2_V3 &s) {
+            py::list out;
+            for (int i = 0; i < 100; i++)
+              out.append(s._tUserCoordinates[i]);
+            return out;
+          },
+          [](SAFETY_CONFIGURATION_EX2_V3 &s, const py::list &lst) {
+            for (int i = 0; i < std::min<int>(100, py::len(lst)); i++)
+              s._tUserCoordinates[i] =
+                  lst[i].cast<CONFIG_USER_COORDINATE_EX2>(); // EX2 vs EX
+          });
 }

@@ -211,7 +211,8 @@ def build_extension() -> Extension:
             "-std=c++17",
             "-O2",
             "-fvisibility=hidden",  # reduces symbol leakage on Linux
-            "-DDRCF_VERSION=2"
+            "-DDRCF_VERSION=2",
+            "-DPYBIND11_DETAILED_ERROR_MESSAGES"
         ] if sys.platform != "win32" else ["/std:c++17", "/O2", "/DDRCF_VERSION=2"],
         **platform_kwargs,
     )

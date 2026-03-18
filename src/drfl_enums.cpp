@@ -1,3 +1,4 @@
+
 #include "./drfl_enums.hpp"
 
 #include "../library/API-DRFL/include/DRFL.h"
@@ -472,7 +473,7 @@ void bind_drfl_enums(py::module_ &m) {
   py::enum_<LOG_LEVEL>(m, "LOG_LEVEL")
       .value("Sys_info", LOG_LEVEL::LOG_LEVEL_SYSINFO)
       .value("Sys_warn", LOG_LEVEL::LOG_LEVEL_SYSWARN)
-      .value("Sys error", LOG_LEVEL::LOG_LEVEL_SYSERROR)
+      .value("Sys_error", LOG_LEVEL::LOG_LEVEL_SYSERROR)
       .value("Sys_last", LOG_LEVEL::LOG_LEVEL_LAST)
       .export_values();
 
