@@ -1755,10 +1755,13 @@ void bDelTool(Class &c) {
 // bool set_tool(string strSymbol)
 void bSetTool(Class &c) {
   // -------------------------------------------------------------------------
-  // check_motion
+  // set_tool
   // -------------------------------------------------------------------------
-  c.def("check_motion",
-        [](DRAFramework::CDRFLEx &self) { return self.check_motion(); });
+  c.def("set_tool",
+        [](DRAFramework::CDRFLEx &self, const std::string &strSymbol) {
+            return self.set_tool(strSymbol);
+        },
+        py::arg("strSymbol"));
 }
 
 // string get_tool()
