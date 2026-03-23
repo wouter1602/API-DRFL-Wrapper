@@ -1139,7 +1139,8 @@ void bMovePeriodic(Class &c) {
       py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
       py::arg("nRepeat"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL,
-                "MOVE_REFERENCE.Tool"));
+                "MOVE_REFERENCE.Tool"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovej(Class &c) {
@@ -1167,7 +1168,8 @@ void bAmovej(Class &c) {
       py::arg_v("blending_type",
                 BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
                 "BLENDING_SPEED_TYPE.Duplicate"),
-      "Amovej array command");
+      "Amovej array command",
+      py::call_guard<py::gil_scoped_release>());
   c.def(
       "amovej",
       [](DRAFramework::CDRFLEx &self, arr_f fTargetPos, arr_f fTargetVel,
@@ -1191,7 +1193,8 @@ void bAmovej(Class &c) {
                 "MOVE_MODE.Absolute"),
       py::arg_v("blending_type",
                 BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
-                "BLENDING_SPEED_TYPE.Duplicate"));
+                "BLENDING_SPEED_TYPE.Duplicate"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovel(Class &c) {
@@ -1220,10 +1223,11 @@ void bAmovel(Class &c) {
                 "MOVE_MODE.Absolute"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
                 "MOVE_REFERENCE.Base"),
-      py::arg_v("eBlendingType",
+      py::arg_v("blending_type",
                 BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
                 "BLENDING_SPEED_TYPE.Duplicate"),
-      py::arg_v("eAppType", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
+      py::arg_v("app_type", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovec(Class &c) {
@@ -1256,13 +1260,14 @@ void bAmovec(Class &c) {
                 "MOVE_MODE.Absolute"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
                 "MOVE_REFERENCE.Base"),
-      py::arg("fTargetAngle1") = 0.f, py::arg("fTargetAngle2") = 0.f,
-      py::arg_v("eBlendingType",
+      py::arg("target_angle1") = 0.f, py::arg("fTargetAngle2") = 0.f,
+      py::arg_v("blending_type",
                 BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
                 "BLENDING_SPEED_TYPE.Duplicate"),
-      py::arg_v("eOrientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH,
+      py::arg_v("orientation", MOVE_ORIENTATION::DR_MV_ORI_TEACH,
                 "MOVE_ORIENTATION.Teach"),
-      py::arg_v("eAppType", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
+      py::arg_v("app_type", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovesj(Class &c) {
@@ -1286,7 +1291,8 @@ void bAmovesj(Class &c) {
       py::arg("pos"), py::arg("pos_count"), py::arg("vel"), py::arg("acc"),
       py::arg("time") = 0.f,
       py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
-                "MOVE_MODE.Absolute"));
+                "MOVE_MODE.Absolute"),
+      py::call_guard<py::gil_scoped_release>());
 
   // -------------------------------------------------------------------------
   // amovesj - array vel/acc overload
@@ -1314,7 +1320,8 @@ void bAmovesj(Class &c) {
       py::arg("pos"), py::arg("pos_count"), py::arg("vel"), py::arg("acc"),
       py::arg("time") = 0.f,
       py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
-                "MOVE_MODE.Absolute"));
+                "MOVE_MODE.Absolute"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovesx(Class &c) {
@@ -1347,9 +1354,10 @@ void bAmovesx(Class &c) {
                 "MOVE_MODE.ABSOLUTE"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
                 "MOVE_REFERENCE.Base"),
-      py::arg_v("eVelOpt",
+      py::arg_v("vel_option",
                 SPLINE_VELOCITY_OPTION::SPLINE_VELOCITY_OPTION_DEFAULT,
-                "SPLINE_VELOCITY_OPTION.Default"));
+                "SPLINE_VELOCITY_OPTION.Default"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmoveb(Class &c) {
@@ -1373,13 +1381,14 @@ void bAmoveb(Class &c) {
                            fTargetVel.mutable_data(), fTargetAcc.mutable_data(),
                            fTargetTime, eMoveMode, eMoveReference, eAppType);
       },
-      py::arg("tTargetPos"), py::arg("pos_count"), py::arg("vel"),
+      py::arg("pos"), py::arg("pos_count"), py::arg("vel"),
       py::arg("acc"), py::arg("time") = 0.f,
       py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
                 "MOVE_MODE.Absolute"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
                 "MOVE_REFERENCE.Base"),
-      py::arg_v("eApptype", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"));
+      py::arg_v("app_type", DR_MV_APP::DR_MV_APP_NONE, "DR_MV_APP.NoApp"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmoveSpiral(Class &c) {
@@ -1400,11 +1409,12 @@ void bAmoveSpiral(Class &c) {
                                  fTargetAcc.mutable_data(), fTargetTime,
                                  eMoveReference);
       },
-      py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("fMaximuRadius"),
-      py::arg("fMaximumLength"), py::arg("vel"), py::arg("acc"),
+      py::arg("task_axis"), py::arg("revolution"), py::arg("maximum_radius"),
+      py::arg("maximum_length"), py::arg("vel"), py::arg("acc"),
       py::arg("time") = 0.f,
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL,
-                "MOVE_REFERENCE.Tool"));
+                "MOVE_REFERENCE.Tool"),
+      py::call_guard<py::gil_scoped_release>());
 
   // -------------------------------------------------------------------------
   // amove_spiral - target position overload
@@ -1426,15 +1436,16 @@ void bAmoveSpiral(Class &c) {
             fTargetVel.mutable_data(), fTargetAcc.mutable_data(), fTargetTime,
             eMoveReference, eMoveMode, eSpiralDir, eRotDir);
       },
-      py::arg("eTaskAxis"), py::arg("fRevolution"), py::arg("pos"),
+      py::arg("task_axis"), py::arg("revolution"), py::arg("pos"),
       py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL,
                 "MOVE_REFERENCE.Tool"),
       py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
                 "MOVE_MODE.Absolute"),
-      py::arg_v("eSpiralDir", SPIRAL_DIR::DR_SPIRAL_OUTWARD,
+      py::arg_v("spiral_dir", SPIRAL_DIR::DR_SPIRAL_OUTWARD,
                 "SPIRAL_DIR.Outward"),
-      py::arg_v("eRotDir", ROT_DIR::DR_ROT_FORWARD, "ROT_DIR.Forward"));
+      py::arg_v("rot_dir", ROT_DIR::DR_ROT_FORWARD, "ROT_DIR.Forward"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bAmovePeriodic(Class &c) {
@@ -1456,10 +1467,11 @@ void bAmovePeriodic(Class &c) {
                                    fPeriodic.mutable_data(), fAccelTime,
                                    nRepeat, eMoveReference);
       },
-      py::arg("fAmplitude"), py::arg("fPeriodic"), py::arg("fAccelTime"),
-      py::arg("nRepeat"),
+      py::arg("amplitude"), py::arg("periodic"), py::arg("acc_time"),
+      py::arg("repeat"),
       py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_TOOL,
-                "MOVE_REFERENCE.Tool"));
+                "MOVE_REFERENCE.Tool"),
+      py::call_guard<py::gil_scoped_release>());
 }
 
 void bStop(Class &c) {
@@ -1471,12 +1483,22 @@ void bStop(Class &c) {
        [](DRAFramework::CDRFLEx &self, STOP_TYPE eStopType) {
          return self.stop(eStopType);
        },
-       py::arg_v("eStopType", STOP_TYPE::STOP_TYPE_QUICK, "STOP_TYPE.Quick"))
-      .def("move_pause",
-           [](DRAFramework::CDRFLEx &self) { return self.move_pause(); })
-      .def("move_resume",
-           [](DRAFramework::CDRFLEx &self) { return self.move_resume(); })
-      .def("mwait", [](DRAFramework::CDRFLEx &self) { return self.mwait(); });
+       py::arg_v("stop_type", STOP_TYPE::STOP_TYPE_QUICK, "STOP_TYPE.Quick"),
+       py::call_guard<py::gil_scoped_release>());
+    c.def("move_pause",
+           [](DRAFramework::CDRFLEx &self) {
+               return self.move_pause();
+           },
+           py::call_guard<py::gil_scoped_release>());
+    c.def("move_resume",
+           [](DRAFramework::CDRFLEx &self) {
+               return self.move_resume();
+           },
+           py::call_guard<py::gil_scoped_release>());
+    c.def("mwait", [](DRAFramework::CDRFLEx &self) {
+        return self.mwait();
+    },
+    py::call_guard<py::gil_scoped_release>());
 }
 
 void bTrans(Class &c) {
@@ -1593,7 +1615,10 @@ void bCheckMotion(Class &c) {
   // check_motion
   // -------------------------------------------------------------------------
   c.def("check_motion",
-        [](DRAFramework::CDRFLEx &self) { return self.check_motion(); });
+        [](DRAFramework::CDRFLEx &self) {
+            return self.check_motion();
+        },
+        py::call_guard<py::gil_scoped_release>());
 }
 
 void bEnableAlterMotion(Class &c) {
