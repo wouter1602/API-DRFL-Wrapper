@@ -154,7 +154,7 @@ void bGetCurrentPose(Class &c) {
   c.def(
       "get_current_pose",
       [](DRAFramework::CDRFLEx &self, ROBOT_SPACE spaceType) {
-        return self.get_current_pose(spaceType);
+        return *self.get_current_pose(spaceType);
       },
       py::arg_v("space_type", ROBOT_SPACE::ROBOT_SPACE_JOINT,
                 "ROBOT_SPACE.Joint"),
@@ -164,21 +164,25 @@ void bGetCurrentPose(Class &c) {
 void bGetcurrentPosj(Class &c) {
   c.def(
       "get_current_posj",
-      [](DRAFramework::CDRFLEx &self) { return self.get_current_posj(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_current_posj();
+      },
       "Get the current position in joint space");
 }
 
 void bGetDesiredPosj(Class &c) {
   c.def(
       "get_desired_posj",
-      [](DRAFramework::CDRFLEx &self) { return self.get_desired_posj(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_desired_posj(); },
       "Get the desired position in joint space");
 }
 
 void bGetCurrentVelj(Class &c) {
   c.def(
       "get_current_velj",
-      [](DRAFramework::CDRFLEx &self) { return self.get_current_velj(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_current_velj(); },
       "Get the current velocity in joint space");
 }
 
@@ -186,7 +190,7 @@ void bGetCurrentPosx(Class &c) {
   c.def(
       "get_current_posx",
       [](DRAFramework::CDRFLEx &self, COORDINATE_SYSTEM coodType) {
-        return self.get_current_posx(coodType);
+        return *self.get_current_posx(coodType);
       },
       py::arg_v("coodType", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
                 "COORDINATE_SYSTEM.Base"),
@@ -197,7 +201,7 @@ void bGetDesiredPosx(Class &c) {
   c.def(
       "get_desired_posx",
       [](DRAFramework::CDRFLEx &self, COORDINATE_SYSTEM coodType) {
-        return self.get_desired_posx(coodType);
+        return *self.get_desired_posx(coodType);
       },
       py::arg_v("coodType", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
                 "COORDINATE_SYSTEM.Base"),
@@ -208,7 +212,7 @@ void bGetCurrentToolFlangePosx(Class &c) {
   c.def(
       "get_current_tool_flange_posx",
       [](DRAFramework::CDRFLEx &self) {
-        return self.get_current_tool_flange_posx();
+        return *self.get_current_tool_flange_posx();
       },
       "Get the current tool flange position in Cartesian space");
 }
@@ -216,35 +220,40 @@ void bGetCurrentToolFlangePosx(Class &c) {
 void bGetCurrentVelx(Class &c) {
   c.def(
       "get_current_velx",
-      [](DRAFramework::CDRFLEx &self) { return self.get_current_velx(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_current_velx(); },
       "Get the current velocity in Cartesian space");
 }
 
 void bGetDesiredVelx(Class &c) {
   c.def(
       "get_desired_velx",
-      [](DRAFramework::CDRFLEx &self) { return self.get_desired_velx(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_desired_velx(); },
       "Get the desired velocity in Cartesian space");
 }
 
 void bGetJointTorque(Class &c) {
   c.def(
       "get_joint_torque",
-      [](DRAFramework::CDRFLEx &self) { return self.get_joint_torque(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_joint_torque(); },
       "Get the joint torque");
 }
 
 void bGetControlSpace(Class &c) {
   c.def(
       "get_control_space",
-      [](DRAFramework::CDRFLEx &self) { return self.get_control_space(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return self.get_control_space(); },
       "Get the control space");
 }
 
 void bGetExternalTorque(Class &c) {
   c.def(
       "get_external_torque",
-      [](DRAFramework::CDRFLEx &self) { return self.get_external_torque(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_external_torque(); },
       "Get the external torque");
 }
 
@@ -252,7 +261,7 @@ void bGetToolForce(Class &c) {
   c.def(
       "get_tool_force",
       [](DRAFramework::CDRFLEx &self, COORDINATE_SYSTEM targetRef) {
-        return self.get_tool_force(targetRef);
+        return *self.get_tool_force(targetRef);
       },
       py::arg_v("targetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
                 "COORDINATE_SYSTEM.Base"),
@@ -271,7 +280,8 @@ void bGetCurrentSolutionSpace(Class &c) {
 void bGetLastalarm(Class &c) {
   c.def(
       "get_last_alarm",
-      [](DRAFramework::CDRFLEx &self) { return self.get_last_alarm(); },
+      [](DRAFramework::CDRFLEx &self) {
+          return *self.get_last_alarm(); },
       "Get the last alarm");
 }
 
@@ -337,7 +347,7 @@ void bGetSafetyConfiguration(Class &c) {
   c.def(
       "get_safety_configuration",
       [](DRAFramework::CDRFLEx &self) {
-        return self.get_safety_configuration();
+        return *self.get_safety_configuration();
       },
       "Get the safety configuration");
 }
@@ -1148,7 +1158,7 @@ void bAmovej(Class &c) {
          BLENDING_SPEED_TYPE blendingType) {
         if (targetPos.size() != NUM_JOINT)
           throw std::runtime_error("Pos must have exactly 6 elements");
-        return self.movej(targetPos.mutable_data(), targetVal, targetAcc,
+        return self.amovej(targetPos.mutable_data(), targetVal, targetAcc,
                           targetTime, moveMode, blendingType);
       },
       py::arg("pos"), py::arg("vel"), py::arg("acc"), py::arg("time") = 0.f,
@@ -1483,7 +1493,7 @@ void bTrans(Class &c) {
         if (fOffset.size() != NUM_TASK)
           throw std::runtime_error(
               "fOffset must have exactly NUM_TASK elements");
-        return self.trans(fSourcePos.mutable_data(), fOffset.mutable_data(),
+        return *self.trans(fSourcePos.mutable_data(), fOffset.mutable_data(),
                           eSourceRef, eTargetRef);
       },
       py::arg("fSourcePos"), py::arg("fOffset"),
@@ -1522,7 +1532,7 @@ void bIkine(Class &c) {
         if (fSourcePos.size() != NUM_TASK)
           throw std::runtime_error(
               "fSourcePos must have exactly NUM_TASK elements");
-        return self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef);
+        return *self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef);
       },
       py::arg("fSourcePos"), py::arg("iSolutionSpace"),
       py::arg_v("eTargetRef", COORDINATE_SYSTEM::COORDINATE_SYSTEM_BASE,
@@ -1539,7 +1549,7 @@ void bIkine(Class &c) {
         if (fSourcePos.size() != NUM_TASK)
           throw std::runtime_error(
               "fSourcePos must have exactly NUM_TASK elements");
-        return self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef,
+        return *self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef,
                          iRefPosOpt);
       },
       py::arg("fSourcePos"), py::arg("iSolutionSpace"), py::arg("eTargetRef"),
@@ -1559,7 +1569,7 @@ void bIkine(Class &c) {
         if (fIterThreshold.size() != NUMBER_OF_ITER_THRESHOULD)
           throw std::runtime_error("fIterThreshold must have exactly "
                                    "NUMBER_OF_ITER_THRESHOULD elements");
-        return self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef,
+        return *self.ikin(fSourcePos.mutable_data(), iSolutionSpace, eTargetRef,
                          fIterThreshold.mutable_data());
       },
       py::arg("fSourcePos"), py::arg("iSolutionSpace"), py::arg("eTargetRef"),
