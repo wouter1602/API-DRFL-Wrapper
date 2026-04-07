@@ -119,6 +119,7 @@ PYBIND11_MODULE(doosan_drfl, m) {
   bAmovec(c);
   bAmovesj(c);
   bAmovesx(c);
+  bAmovejx(c);
   bAmoveb(c);
   bAmoveSpiral(c);
   bAmovePeriodic(c);

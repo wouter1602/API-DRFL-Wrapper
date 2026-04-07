@@ -91,6 +91,7 @@ void bAmovel(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmovec(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmovesj(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmovesx(py::class_<DRAFramework::CDRFLEx>& c);
+void bAmovejx(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmoveb(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmoveSpiral(py::class_<DRAFramework::CDRFLEx>& c);
 void bAmovePeriodic(py::class_<DRAFramework::CDRFLEx>& c);

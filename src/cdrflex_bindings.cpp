@@ -1360,6 +1360,62 @@ void bAmovesx(Class &c) {
       py::call_guard<py::gil_scoped_release>());
 }
 
+void bAmovejx(Class &c) {
+  // -------------------------------------------------------------------------
+  // amovejx
+  // -------------------------------------------------------------------------
+
+  c.def(
+      "aovejx",
+      [](DRAFramework::CDRFLEx &self, py::array_t<float> targetPos,
+          unsigned char solutionSpace, float targetVel, float targetAcc,
+          float targetTime, MOVE_MODE moveMode, MOVE_REFERENCE moveReference,
+          BLENDING_SPEED_TYPE blendingType) {
+        if (targetPos.size() != NUM_TASK)
+          throw std::runtime_error("Pos must have exactly 6 elements.");
+
+        return self.amovejx(targetPos.mutable_data(), solutionSpace, targetVel,
+            targetAcc, targetTime, moveMode, moveReference, blendingType);
+      },
+      py::arg("pos"), py::arg("solution_space"), py::arg("vel"), py::arg("acc"),
+      py::arg("time") = 0.f,
+      py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
+                "MOVE_MODE.Absolute"),
+      py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+                "MOVE_REFERENCE.Base"),
+      py::arg_v("blending_type",
+                BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+                "BLENDING_SPEED_TYPE.Duplicate"),
+      "amovejx command");
+
+  c.def(
+      "amovejx",
+      [](DRAFramework::CDRFLEx &self, py::array_t<float> targetPos,
+          unsigned char solutionSpace, py::array_t<float> targetVel,
+          py::array_t<float> targetAcc, float targetTime, MOVE_MODE moveMode,
+          MOVE_REFERENCE moveReference, BLENDING_SPEED_TYPE blendingType) {
+        if (targetPos.size() != NUM_JOINT)
+          throw std::runtime_error("Pos must have exactly 6 elements.");
+        if (targetVel.size() != NUM_JOINT)
+          throw std::runtime_error("vel must have exactly 6 elements.");
+        if (targetAcc.size() != NUM_JOINT)
+          throw std::runtime_error("Acc must have exactly 6 elements.");
+        return self.amovejx(targetPos.mutable_data(), solutionSpace,
+            targetVel.mutable_data(), targetAcc.mutable_data(),
+            targetTime, moveMode, moveReference, blendingType);
+      },
+      py::arg("pos"), py::arg("solution_space"), py::arg("vel"), py::arg("acc"),
+      py::arg("time") = 0.f,
+      py::arg_v("move_mode", MOVE_MODE::MOVE_MODE_ABSOLUTE,
+                "MOVE_MODE.Absolute"),
+      py::arg_v("move_reference", MOVE_REFERENCE::MOVE_REFERENCE_BASE,
+                "MOVE_REFERENCE.Base"),
+      py::arg_v("blending_type",
+                BLENDING_SPEED_TYPE::BLENDING_SPEED_TYPE_DUPLICATE,
+                "BLENDING_SPEED_TYPE.Duplicate"),
+      "amovejx command");
+}
+
 void bAmoveb(Class &c) {
   // -------------------------------------------------------------------------
   // amoveb
