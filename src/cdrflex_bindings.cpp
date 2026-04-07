@@ -1366,7 +1366,7 @@ void bAmovejx(Class &c) {
   // -------------------------------------------------------------------------
 
   c.def(
-      "aovejx",
+      "amovejx",
       [](DRAFramework::CDRFLEx &self, py::array_t<float> targetPos,
           unsigned char solutionSpace, float targetVel, float targetAcc,
           float targetTime, MOVE_MODE moveMode, MOVE_REFERENCE moveReference,
