@@ -10,6 +10,7 @@
 #include "./cdrflex_bindings.hpp"
 #include "./drfl_structs.hpp"
 #include "./drfl_enums.hpp"
+#include "./drfl_bindings_extra.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -214,4 +215,73 @@ PYBIND11_MODULE(doosan_drfl, m) {
   bCoordTransform(c);
   bSetPalletizingMode(c);
   bQueryModbusDataList(c);
+
+  // ── RT control ────────────────────────────────────────────────────────────
+  bConnectRtControl(c);
+  bDisconnectRtControl(c);
+  bGetRtControlOutputVersionList(c);
+  bGetRtControlInputVersionList(c);
+  bGetRtControlInputDataList(c);
+  bGetRtControlOutputDataList(c);
+  bSetRtControlInput(c);
+  bSetRtControlOutput(c);
+  bStartRtControl(c);
+  bStopRtControl(c);
+  bSetVeljRt(c);
+  bSetAccjRt(c);
+  bSetVelxRt(c);
+  bSetAccxRt(c);
+  bReadDataRt(c);
+  bWriteDataRt(c);
+  bServojRt(c);
+  bServolRt(c);
+  bSpeedjRt(c);
+  bSpeedlRt(c);
+  bTorqueRt(c);
+  bSetOnRtMonitoringData(c);
+  bSetOnRtLogAlarm(c);
+  bSetOnMonitoringSafetyStopType(c);
+
+  // ── Hold-to-Run ───────────────────────────────────────────────────────────
+  bHold2Run(c);
+  bJogH2r(c);
+  bMovejH2r(c);
+  bMovelH2r(c);
+
+  // ── Ethernet registers ────────────────────────────────────────────────────
+  bSetOutputRegisterBit(c);
+  bSetOutputRegisterInt(c);
+  bSetOutputRegisterFloat(c);
+  bGetOutputRegisterBit(c);
+  bGetOutputRegisterInt(c);
+  bGetOutputRegisterFloat(c);
+  bGetInputRegisterBit(c);
+  bGetInputRegisterInt(c);
+  bGetInputRegisterFloat(c);
+
+  // ── Motion extras ─────────────────────────────────────────────────────────
+  bMultiJog(c);
+  bGetUserHome(c);
+  bSafeMovej(c);
+  bSafeMovel(c);
+  bSafeMovejx(c);
+  bServojG(c);
+  bServolG(c);
+  bMovesxG(c);
+  bMovesjG(c);
+  bIkinNorm(c);
+  bAddto(c);
+
+  // ── Config extras ─────────────────────────────────────────────────────────
+  bGetToolShape(c);
+  bSetSingularHandlingForce(c);
+  bSetAutoSafetyMoveStop(c);
+
+  // ── System / LED / link ───────────────────────────────────────────────────
+  bSystemShutDown(c);
+  bStateLedReset(c);
+  bSetStateLedOff(c);
+  bSetStateLedColor(c);
+  bGetStateLedRule(c);
+  bGetRobotLinkInfo(c);
 }

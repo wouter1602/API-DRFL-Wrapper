@@ -519,4 +519,9 @@ void bind_drfl_enums(py::module_ &m) {
       .value("Override", DR_SERVOJ_TYPE::DR_SERVO_OVERRIDE)
       .value("Queue", DR_SERVOJ_TYPE::DR_SERVO_QUEUE)
       .export_values();
+
+  py::enum_<SINGULARITY_FORCE_HANDLING>(m, "SINGULARITY_FORCE_HANDLING")
+      .value("Error",  SINGULARITY_FORCE_HANDLING::SINGULARITY_ERROR)
+      .value("Ignore", SINGULARITY_FORCE_HANDLING::SINGULARITY_IGNORE)
+      .export_values();
 }

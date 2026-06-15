@@ -14,6 +14,8 @@ This is a python wrapper for the [Doosan Robotics Framework Library](https://git
 
 - distro (optional)
 
+- python3-dev
+
 
 ## Compile command
 

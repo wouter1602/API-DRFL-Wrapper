@@ -29,6 +29,7 @@ SOURCES = [
     str(SRC_DIR / "drfl_enums.cpp"),
     str(SRC_DIR / "drfl_structs.cpp"),
     str(SRC_DIR / "drfl_wrapper.cpp"),
+    str(SRC_DIR / "drfl_bindings_extra.cpp"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -245,6 +246,6 @@ def build_extension() -> Extension:
 
 setup(
     name="doosan_drfl",
-    version="1.0",
+    version="1.1",
     ext_modules=[build_extension()],
 )
