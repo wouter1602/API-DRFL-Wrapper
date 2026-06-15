@@ -3,6 +3,9 @@ setup.py — Platform-aware build configuration for the DRFL pybind11 extension.
 
 Reads OS / architecture / Ubuntu version at build time and selects the
 correct pre-built libraries from the vendor tree.
+
+Environment variables:
+    DRCF_VERSION   '2' or '3' (default: '2').  Selects which DRCF API to target.
 """
 from __future__ import annotations
 
@@ -31,6 +34,27 @@ SOURCES = [
     str(SRC_DIR / "drfl_wrapper.cpp"),
     str(SRC_DIR / "drfl_bindings_extra.cpp"),
 ]
+
+# ---------------------------------------------------------------------------
+# DRCF version selection (env var)
+# ---------------------------------------------------------------------------
+
+def _drcf_version() -> str:
+    """
+    Read DRCF_VERSION from the environment. Must be '2' or '3'.
+    Defaults to '2' if unset.
+    """
+    raw = os.environ.get("DRCF_VERSION", "2").strip()
+    if raw not in ("2", "3"):
+        raise RuntimeError(
+            f"Invalid DRCF_VERSION={raw!r}. Must be '2' or '3'. "
+            f"Example:  DRCF_VERSION=3 pip install ."
+        )
+    print(f"[setup.py] DRCF_VERSION = {raw}")
+    return raw
+
+
+DRCF_VERSION = _drcf_version()
 
 # ---------------------------------------------------------------------------
 # Platform detection helpers
@@ -62,25 +86,17 @@ def _ubuntu_version() -> str | None:
 def _best_ubuntu_version(available: list[str], detected: str | None) -> str:
     """
     Pick the best available Ubuntu version folder for *detected*.
-
-    - Exact match → use it.
-    - No match (generic Linux or unknown distro) → use the newest available.
-    - Detected is newer than all available → use the newest available.
-    - Detected is older than the oldest available → use the oldest available.
     """
     available_sorted = sorted(available, key=lambda v: tuple(int(x) for x in v.split(".")))
 
     if detected is not None:
         det_tuple = tuple(int(x) for x in detected.split("."))
-        # Exact match
         if detected in available:
             return detected
-        # Closest version that is ≤ detected (fall back gracefully)
         candidates = [v for v in available_sorted if tuple(int(x) for x in v.split(".")) <= det_tuple]
         if candidates:
             return candidates[-1]
 
-    # Generic Linux or nothing found — use newest
     return available_sorted[-1]
 
 
@@ -94,8 +110,23 @@ def _arch() -> str:
         return "amd64"
     if machine in ("aarch64", "arm64"):
         return "arm64"
-    # Best-effort fallback
     return "amd64"
+
+
+def _is_msvc() -> bool:
+    """
+    Best-effort detection of whether MSVC is the active compiler on Windows.
+    Falls back to True (MSVC) since that's the default CPython toolchain.
+    """
+    if sys.platform != "win32":
+        return False
+    # Allow explicit override (e.g. when using MinGW)
+    if os.environ.get("DRFL_WINDOWS_COMPILER", "").lower() in ("mingw", "gcc"):
+        return False
+    # distutils legacy hint
+    if os.environ.get("DISTUTILS_USE_SDK") or os.environ.get("VSINSTALLDIR"):
+        return True
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +170,6 @@ def _select_windows_lib_dir() -> Path:
 def _platform_extension_kwargs() -> dict:
     """
     Return the platform-specific keyword arguments for the Extension.
-    Keys: library_dirs, libraries, extra_objects, extra_link_args, runtime_library_dirs
     """
     system = sys.platform
 
@@ -147,57 +177,77 @@ def _platform_extension_kwargs() -> dict:
         lib_dir = _select_windows_lib_dir()
         bits = _bits()
         prefix = "Win64" if bits == 64 else "Win32"
-        poco_suffix = "64" if bits == 64 else ""
+        msvc = _is_msvc()
 
-        return dict(
-            library_dirs=[str(lib_dir)],
-            # Link against the import libs (.dll.a for MinGW, .lib for MSVC)
-            extra_objects=[
-                str(lib_dir / f"DRFL{prefix}.dll.a"),
-            ],
-            extra_link_args=[],
-            libraries=[],  # Poco DLLs are runtime-loaded; ship alongside the wheel
-            define_macros=[("DRFL_WINDOWS", None)],
-        )
+        # On Windows the vendor tree typically ships:
+        #   - DRFLWin64.lib       (MSVC import lib)
+        #   - DRFLWin64.dll.a     (MinGW import lib)
+        #   - DRFLWin64.dll       (runtime)
+        # Pick the right one for the active compiler.
+        drfl_basename = f"DRFL{prefix}"
+        msvc_lib  = lib_dir / f"{drfl_basename}.lib"
+        mingw_lib = lib_dir / f"{drfl_basename}.dll.a"
+
+        if msvc:
+            if not msvc_lib.exists():
+                raise RuntimeError(
+                    f"MSVC build requested but {msvc_lib} is missing. "
+                    f"Either install the .lib import library, or set "
+                    f"DRFL_WINDOWS_COMPILER=mingw to use the .dll.a file."
+                )
+            print(f"[setup.py] Windows/MSVC — linking {msvc_lib.name}")
+            return dict(
+                library_dirs=[str(lib_dir)],
+                libraries=[drfl_basename],   # MSVC will find DRFLWin64.lib
+                extra_objects=[],
+                extra_link_args=[],
+                define_macros=[
+                    ("DRFL_WINDOWS", None),
+                    ("NOMINMAX", None),
+                    ("WIN32_LEAN_AND_MEAN", None),
+                    ("_CRT_SECURE_NO_WARNINGS", None),
+                ],
+            )
+        else:
+            if not mingw_lib.exists():
+                raise RuntimeError(f"MinGW build requested but {mingw_lib} is missing.")
+            print(f"[setup.py] Windows/MinGW — linking {mingw_lib.name}")
+            return dict(
+                library_dirs=[str(lib_dir)],
+                libraries=[],
+                extra_objects=[str(mingw_lib)],
+                extra_link_args=[],
+                define_macros=[
+                    ("DRFL_WINDOWS", None),
+                    ("NOMINMAX", None),
+                    ("WIN32_LEAN_AND_MEAN", None),
+                ],
+            )
 
     elif system.startswith("linux"):
         lib_dir = _select_linux_lib_dir()
 
-        # Check if system Poco is available (non-Ubuntu distros)
         ubuntu_ver = _ubuntu_version()
-        use_system_poco = ubuntu_ver is None  # not Ubuntu → use system libs
+        use_system_poco = ubuntu_ver is None
 
         kwargs = dict(
             library_dirs=[str(lib_dir)],
-            extra_objects=[str(lib_dir / "libDRFL.a")],  # always use vendored DRFL
+            extra_objects=[str(lib_dir / "libDRFL.a")],
             extra_link_args=[],
             define_macros=[("DRFL_LINUX", None)],
         )
 
         if use_system_poco:
-            # Let the linker find Poco from the system
             kwargs["libraries"] = ["PocoFoundation", "PocoNet"]
             print("[setup.py] Non-Ubuntu distro — linking against system Poco libraries")
         else:
-            # Use vendored Poco .so files with embedded RPATH
             kwargs["libraries"] = ["PocoFoundation", "PocoNet"]
             kwargs["library_dirs"].append(str(lib_dir))
             kwargs["extra_link_args"] = [f"-Wl,-rpath,{lib_dir}"]
 
         return kwargs
 
-    # elif system.startswith("linux"):
-    #     lib_dir = _select_linux_lib_dir()
-    #     return dict(
-    #         library_dirs=[str(lib_dir)],
-    #         libraries=["DRFL", "PocoFoundation", "PocoNet"],
-    #         runtime_library_dirs=[str(lib_dir)],  # embed RPATH
-    #         extra_link_args=[f"-Wl,-rpath,{lib_dir}"],
-    #         define_macros=[("DRFL_LINUX", None)],
-    #     )
-
     elif system == "darwin":
-        # macOS is not listed in the vendor tree; raise early with a clear message.
         raise RuntimeError("macOS is not supported by the DRFL vendor libraries.")
 
     else:
@@ -226,6 +276,23 @@ def _pybind11_includes() -> list[str]:
 def build_extension() -> Extension:
     platform_kwargs = _platform_extension_kwargs()
 
+    # Merge DRCF_VERSION into define_macros so it works identically on MSVC
+    # and GCC/Clang — no need for compiler-specific -D / /D flags.
+    define_macros = list(platform_kwargs.pop("define_macros", []))
+    define_macros.append(("DRCF_VERSION", DRCF_VERSION))
+
+    if sys.platform == "win32":
+        # MSVC needs /EHsc for C++ exceptions (pybind11 requires it).
+        # /bigobj avoids "too many sections" errors with template-heavy code.
+        extra_compile_args = ["/std:c++17", "/O2", "/EHsc", "/bigobj", "/permissive-"]
+    else:
+        extra_compile_args = [
+            "-std=c++17",
+            "-O2",
+            "-fvisibility=hidden",
+            "-DPYBIND11_DETAILED_ERROR_MESSAGES",
+        ]
+
     return Extension(
         name="doosan_drfl",
         sources=SOURCES,
@@ -234,13 +301,8 @@ def build_extension() -> Extension:
             _pybind11_includes(),
         ],
         language="c++",
-        extra_compile_args=[
-            "-std=c++17",
-            "-O2",
-            "-fvisibility=hidden",  # reduces symbol leakage on Linux
-            "-DDRCF_VERSION=2",
-            "-DPYBIND11_DETAILED_ERROR_MESSAGES"
-        ] if sys.platform != "win32" else ["/std:c++17", "/O2", "/DDRCF_VERSION=2"],
+        extra_compile_args=extra_compile_args,
+        define_macros=define_macros,
         **platform_kwargs,
     )
 

@@ -5,6 +5,7 @@ install.py — Build the DRFL extension, generate pybind11 stubs, and install
 
 Usage:
     python install.py [--skip-stubs] [--editable] [--verbose]
+                      [--drcf-version {2,3}]
 
 Requirements:
     pip install pybind11 pybind11-stubgen build
@@ -69,8 +70,16 @@ def step_check_dependencies() -> None:
     _check_tool("build", "build")
 
 
-def step_build_and_install(editable: bool, verbose: bool) -> None:
+def step_build_and_install(editable: bool, verbose: bool, drcf_version: str) -> None:
     print("\n── Building & installing extension ──────────────────────────")
+    print(f"[install.py] DRCF_VERSION = {drcf_version}")
+
+    # Propagate DRCF_VERSION to the build backend via the environment.
+    # PEP 517 build front-ends forward env vars to the build subprocess,
+    # so setup.py will pick this up via os.environ["DRCF_VERSION"].
+    env = os.environ.copy()
+    env["DRCF_VERSION"] = drcf_version
+
     if editable:
         # In-place build; the .so/.pyd ends up next to setup.py
         cmd = [*_pip(), "install", "--no-build-isolation", "-e", str(HERE)]
@@ -80,7 +89,7 @@ def step_build_and_install(editable: bool, verbose: bool) -> None:
     if verbose:
         cmd.append("-v")
 
-    _run(cmd, cwd=HERE)
+    _run(cmd, cwd=HERE, env=env)
 
 
 def step_generate_stubs(verbose: bool) -> None:
@@ -166,11 +175,22 @@ def main() -> None:
         action="store_true",
         help="Pass --verbose to pip and pybind11-stubgen.",
     )
+    parser.add_argument(
+        "--drcf-version",
+        choices=["2", "3"],
+        default=os.environ.get("DRCF_VERSION", "2"),
+        help="DRCF API version to compile against (2 or 3). "
+             "Defaults to the DRCF_VERSION env var if set, otherwise '2'.",
+    )
     args = parser.parse_args()
 
     _assert_venv()
     step_check_dependencies()
-    step_build_and_install(editable=args.editable, verbose=args.verbose)
+    step_build_and_install(
+        editable=args.editable,
+        verbose=args.verbose,
+        drcf_version=args.drcf_version,
+    )
 
     if not args.skip_stubs:
         step_generate_stubs(verbose=args.verbose)
